@@ -2,9 +2,54 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
+    <title>Differential Growth</title>
+    <style>
+      html {
+        background-color: #DDD;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        height: 100%;
+      }
+
+      /* Scale canvas with resize attribute to full size */
+      canvas[resize] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+      }
+
+      .infobox {
+        display: inline-block;
+        padding: 8px;
+        z-index: 1;
+      }
+
+      .infobox a svg {
+        width: 20px;
+        height: 20px;
+        opacity: 0.4;
+        margin-right: 5px;
+      }
+
+      .infobox a {
+        text-decoration: none;
+      }
+
+      .infobox a svg:hover {
+        opacity: 1;
+      }
+    </style>
   </head>
   <body>
+    <canvas id="paper-canvas" resize></canvas>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <script src="./bootstrap.js"></script>
   </body>
