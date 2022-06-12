@@ -82,15 +82,17 @@ window.onload = function() {
 function generateCirlePoints(amountOfPoints, r) {
     let segments = []
 
-    let h = paper.view.center.x
-    let k = paper.view.center.y
+    let arr = wasm.generate_points_of_circle_as_array(
+        paper.view.center.x,
+        paper.view.center.y,
+        40,
+        100
+    )
 
-    for (let theta = 0; theta < 2*Math.PI; theta = theta + (2 * Math.PI / amountOfPoints)) {
-        let x = h + r * Math.cos(theta)
-        let y = k + r * Math.sin(theta)
-        let point = new paper.Point(x, y)
+    for (let i = 0; i < arr.length; i = i+2) {
+        let point = new paper.Point(arr[i], arr[i + 1])
         let vector = point.subtract(paper.view.center);
-        segments.push(point.add(vector.multiply(Math.random()/5)))
+        segments.push(point.add(vector.multiply(Math.random() / 5)))
     }
 
     return segments
