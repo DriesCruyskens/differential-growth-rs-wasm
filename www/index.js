@@ -7,7 +7,7 @@ const gui = new dat.GUI();
 
 // wasm.greet();
 
-let totalSteps = 5000;
+let totalSteps = 150;
 let currentStep = 0;
 
 let radius = 100
@@ -18,8 +18,6 @@ let rejectionFactor = 0.001
 
 let attractionFactor = 0.01;
 
-let milliSecondsPerFrame = 16;
-
 // Only executed our code once the DOM is ready.
 window.onload = function () {
     paper.setup(document.getElementById("paper-canvas"));
@@ -27,7 +25,7 @@ window.onload = function () {
     // initialise path
     let path = new paper.Path();
     path.strokeColor = 'black';
-    path.addSegments(generateCirlePoints(amountOfPoints, radius))
+    path.addSegments(initSegments(amountOfPoints, radius))
     path.closed = true
     path.smooth()
     path.selected = true;
@@ -35,10 +33,10 @@ window.onload = function () {
     console.log(path)
 
     // Loop
-    let intervalId
-    intervalId = setInterval(() => {
+    function repeatOften() {
+        console.log(totalSteps, currentStep)
         if (currentStep > totalSteps) {
-            clearInterval(intervalId)
+            return
         }
 
         // introduce new nodes
@@ -103,19 +101,21 @@ window.onload = function () {
         // })
 
         currentStep = currentStep + 1
-    }, milliSecondsPerFrame)
+        requestAnimationFrame(repeatOften);
+      }
+      requestAnimationFrame(repeatOften);
 }
 
 // Generates the point of a circle
 // https://www.mathopenref.com/coordcirclealgorithm.html
-function generateCirlePoints(amountOfPoints, r) {
+function initSegments(amountOfPoints, r) {
     let segments = []
 
     let arr = wasm.init(
         paper.view.center.x,
         paper.view.center.y,
-        400,
-        100
+        amountOfPoints,
+        r
     )
 
     for (let i = 0; i < arr.length; i = i + 2) {
