@@ -1,10 +1,8 @@
 mod utils;
 
-use std::f64::consts::PI;
-
-use utils::set_panic_hook;
+use micromath::vector;
+use utils::{generate_points_of_circle, set_panic_hook};
 use wasm_bindgen::prelude::*;
-extern crate web_sys;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
@@ -30,31 +28,49 @@ pub fn greet() {
 }
 
 #[wasm_bindgen]
-pub fn generate_points_of_circle_as_array(
-    origin_x: f64,
-    origin_y: f64,
+pub fn init(
+    origin_x: f32,
+    origin_y: f32,
     amount_of_points: usize,
-    radius: f64,
-) -> Box<[u32]> {
+    radius: f32,
+    // https://rustwasm.github.io/wasm-bindgen/reference/types/boxed-number-slices.html
+) -> Box<[f32]> {
     set_panic_hook();
-    let mut points: Vec<u32> = Vec::new();
 
-    let h = origin_x;
-    let k = origin_y;
+    let line = Line::new(origin_x, origin_y, amount_of_points, radius);
 
-    let two_pi = (2.0 * PI).round();
+    return line.nodes.into_iter().map(|x| x.position.x).collect::<Vec<f32>>().into_boxed_slice();
+}
 
-    let lin_space = iter_num_tools::lin_space(0.0..=two_pi, amount_of_points);
+struct Line {
+    nodes: Vec<Node>,
+}
 
-    log!("{:?}", lin_space);
-
-    for theta in lin_space {
-        let x = h + radius * f64::cos(theta as f64);
-        let y = k + radius * f64::sin(theta as f64);
-
-        points.push(x as u32);
-        points.push(y as u32);
+impl Line {
+    pub fn new(origin_x: f32, origin_y: f32, amount_of_points: usize, radius: f32) -> Line {
+        let nodes: Vec<Node> = generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
+            .into_iter()
+            .map(|point: vector::F32x2| Node::new(point)).collect();
+        Line { nodes }
     }
+}
 
-    return points.into_boxed_slice();
+struct Node {
+    position: vector::F32x2,
+    velocity: vector::F32x2,
+    acceleration: vector::F32x2,
+    r: f32,
+    max_force: f32,
+    max_speed: f32,
+}
+
+impl Node {
+    pub fn new(position: vector::F32x2) -> Node {
+        Node {
+            position,
+            velocity: vector::F32x2 { x: 0.0, y: 0.0 },
+            acceleration: vector::F32x2 { x: 0.0, y: 0.0 },
+            r: 2.0, max_speed: 2.0, max_force: 0.03
+        }
+    }
 }

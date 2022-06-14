@@ -1,6 +1,7 @@
 use std::f64::consts::PI;
 
-use nalgebra::Point2;
+use iter_num_tools::{lin_space, LinSpace};
+use micromath::vector;
 
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -14,23 +15,24 @@ pub fn set_panic_hook() {
 }
 
 pub fn generate_points_of_circle(
-    origin_x: f64,
-    origin_y: f64,
-    amount_of_points: f64,
-    radius: f64,
-) -> Vec<Point2<f64>> {
-    let mut points: Vec<Point2<f64>> = Vec::new();
+    origin_x: f32,
+    origin_y: f32,
+    amount_of_points: usize,
+    radius: f32,
+) -> Vec<vector::F32x2> {
+    let mut points: Vec<vector::F32x2> = Vec::new();
 
-    let h = origin_x;
-    let k = origin_y;
+    let h: f32 = origin_x;
+    let k: f32 = origin_y;
 
-    let two_pi = (2.0 * PI).round() as usize;
-    let step = (2.0 * PI / amount_of_points).round() as usize;
+    let two_pi: f64 = (2.0 * PI).round();
 
-    for theta in (0..two_pi).step_by(step) {
-        let x = h + radius * f64::cos(theta as f64);
-        let y = k + radius * f64::sin(theta as f64);
-        let point: Point2<f64> = Point2::new(x, y);
+    let lin_space: LinSpace<f32> = lin_space(0.0..=two_pi as f32, amount_of_points);
+
+    for theta in lin_space {
+        let x: f32 = h + radius * f32::cos(theta);
+        let y: f32 = k + radius * f32::sin(theta);
+        let point: vector::F32x2 = vector::F32x2 { x, y };
         points.push(point);
     }
 
