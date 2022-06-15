@@ -1,6 +1,11 @@
 mod utils;
 
-use micromath::{vector::Vector2d, F32};
+use std::ops::{AddAssign, MulAssign};
+
+use micromath::{
+    vector::{Vector, Vector2d},
+    *,
+};
 use utils::{generate_points_of_circle, set_panic_hook};
 use wasm_bindgen::prelude::*;
 
@@ -37,7 +42,7 @@ pub fn init(
 ) -> Box<[f32]> {
     set_panic_hook();
 
-    let line = Line::new(
+    let line: Line = Line::new(
         F32 { 0: origin_x },
         F32 { 0: origin_y },
         amount_of_points,
@@ -71,7 +76,6 @@ struct Node {
     position: Vector2d<F32>,
     velocity: Vector2d<F32>,
     acceleration: Vector2d<F32>,
-    r: F32,
     max_force: F32,
     max_speed: F32,
 }
@@ -88,9 +92,36 @@ impl Node {
                 x: F32 { 0: 0.0 },
                 y: F32 { 0: 0.0 },
             },
-            r: F32 { 0: 2.0 },
             max_speed: F32 { 0: 2.0 },
-            max_force: F32 { 0: 0.03 },
+            max_force: F32 { 0: 0.2 },
+        }
+    }
+
+    pub fn applyForce(&mut self, force: Vector2d<F32>) {
+        self.acceleration = self.acceleration + force;
+    }
+
+    pub fn update(&mut self) {
+        self.velocity = self.velocity + self.acceleration;
+        self.velocity.limit(self.max_speed);
+        self.position = self.position + self.velocity;
+        self.acceleration.mul_assign(F32 { 0: 0.0 });
+    }
+}
+
+trait Limitable {
+    fn limit(&mut self, max: F32);
+}
+
+// Limiting the vector's magnitude by normalising and multiplying by max.
+impl Limitable for Vector2d<F32> {
+    fn limit(&mut self, max: F32) {
+        let magnitude: f32 = self.magnitude();
+        if magnitude > max {
+            self.x = self.x / magnitude;
+            self.y = self.y / magnitude;
+            self.x = self.x * max;
+            self.y = self.y * max;
         }
     }
 }
