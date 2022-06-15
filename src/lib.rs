@@ -1,6 +1,6 @@
 mod utils;
 
-use std::ops::{AddAssign, MulAssign};
+use std::ops::{AddAssign, MulAssign, Sub};
 
 use nalgebra::Vector2;
 use utils::{generate_points_of_circle, set_panic_hook};
@@ -92,5 +92,12 @@ impl Node {
         self.velocity = self.velocity.cap_magnitude(self.max_speed);
         self.position.add_assign(self.velocity);
         self.acceleration.mul_assign(0.0);
+    }
+
+    pub fn seek(&mut self, target: Vector2<f32>) -> Vector2<f32> {
+        let mut desired: Vector2<f32> = target.sub(self.position);
+        desired.set_magnitude(self.max_speed);
+        let steer: Vector2<f32> = desired.sub(self.velocity);
+        return steer.cap_magnitude(self.max_force)
     }
 }
