@@ -44,7 +44,7 @@ pub fn init(
     return line
         .nodes
         .into_iter()
-        .map(|node| node.position.x)
+        .map(|node| node.position.y)
         .collect::<Vec<f32>>()
         .into_boxed_slice();
 }
