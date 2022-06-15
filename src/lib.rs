@@ -1,6 +1,6 @@
 mod utils;
 
-use micromath::vector;
+use micromath::{vector::Vector2d, F32};
 use utils::{generate_points_of_circle, set_panic_hook};
 use wasm_bindgen::prelude::*;
 
@@ -37,9 +37,19 @@ pub fn init(
 ) -> Box<[f32]> {
     set_panic_hook();
 
-    let line = Line::new(origin_x, origin_y, amount_of_points, radius);
+    let line = Line::new(
+        F32 { 0: origin_x },
+        F32 { 0: origin_y },
+        amount_of_points,
+        F32 { 0: radius },
+    );
 
-    return line.nodes.into_iter().map(|x| x.position.x).collect::<Vec<f32>>().into_boxed_slice();
+    return line
+        .nodes
+        .into_iter()
+        .map(|x| x.position.x.0)
+        .collect::<Vec<f32>>()
+        .into_boxed_slice();
 }
 
 struct Line {
@@ -47,30 +57,40 @@ struct Line {
 }
 
 impl Line {
-    pub fn new(origin_x: f32, origin_y: f32, amount_of_points: usize, radius: f32) -> Line {
-        let nodes: Vec<Node> = generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
-            .into_iter()
-            .map(|point: vector::F32x2| Node::new(point)).collect();
+    pub fn new(origin_x: F32, origin_y: F32, amount_of_points: usize, radius: F32) -> Line {
+        let nodes: Vec<Node> =
+            generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
+                .into_iter()
+                .map(|point: Vector2d<F32>| Node::new(point))
+                .collect();
         Line { nodes }
     }
 }
 
 struct Node {
-    position: vector::F32x2,
-    velocity: vector::F32x2,
-    acceleration: vector::F32x2,
-    r: f32,
-    max_force: f32,
-    max_speed: f32,
+    position: Vector2d<F32>,
+    velocity: Vector2d<F32>,
+    acceleration: Vector2d<F32>,
+    r: F32,
+    max_force: F32,
+    max_speed: F32,
 }
 
 impl Node {
-    pub fn new(position: vector::F32x2) -> Node {
+    pub fn new(position: Vector2d<F32>) -> Node {
         Node {
             position,
-            velocity: vector::F32x2 { x: 0.0, y: 0.0 },
-            acceleration: vector::F32x2 { x: 0.0, y: 0.0 },
-            r: 2.0, max_speed: 2.0, max_force: 0.03
+            velocity: Vector2d {
+                x: F32 { 0: 0.0 },
+                y: F32 { 0: 0.0 },
+            },
+            acceleration: Vector2d {
+                x: F32 { 0: 0.0 },
+                y: F32 { 0: 0.0 },
+            },
+            r: F32 { 0: 2.0 },
+            max_speed: F32 { 0: 2.0 },
+            max_force: F32 { 0: 0.03 },
         }
     }
 }
