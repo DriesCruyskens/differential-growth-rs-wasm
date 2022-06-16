@@ -39,7 +39,17 @@ pub fn init(
 ) -> Box<[f32]> {
     set_panic_hook();
 
-    let line: Line = Line::new(origin_x, origin_y, amount_of_points, radius);
+    let line: Line = Line::new(
+        origin_x,
+        origin_y,
+        amount_of_points,
+        radius,
+        0.2,
+        2.0,
+        10.0,
+        1.1,
+        5.0,
+    );
 
     return line
         .nodes
@@ -51,16 +61,59 @@ pub fn init(
 
 struct Line {
     nodes: Vec<Node>,
+    max_force: f32,
+    max_speed: f32,
+    desired_separation: f32,
+    sq_desired_separation: f32,
+    separation_cohesionRation: f32,
+    max_edge_len: f32,
 }
 
 impl Line {
-    pub fn new(origin_x: f32, origin_y: f32, amount_of_points: usize, radius: f32) -> Line {
+    pub fn new(
+        origin_x: f32,
+        origin_y: f32,
+        amount_of_points: usize,
+        radius: f32,
+        max_force: f32,
+        max_speed: f32,
+        desired_separation: f32,
+        separation_cohesion_ration: f32,
+        max_edge_len: f32,
+    ) -> Line {
         let nodes: Vec<Node> =
             generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
                 .into_iter()
-                .map(|point: Vector2<f32>| Node::new(point))
+                .map(|point: Vector2<f32>| Node::new(point, max_speed, max_force))
                 .collect();
-        Line { nodes }
+        Line {
+            nodes,
+            max_force,
+            max_speed,
+            desired_separation,
+            sq_desired_separation: desired_separation.sqrt(),
+            separation_cohesionRation: separation_cohesion_ration,
+            max_edge_len,
+        }
+    }
+    pub fn add_node(&mut self, node: Node) {
+        self.nodes.push(node);
+    }
+
+    pub fn add_node_at(&mut self, node: Node, index: usize) {
+        self.nodes.insert(index, node);
+    }
+
+    pub fn run(&mut self) {
+
+    }
+
+    pub fn differentiate() {
+
+    }
+
+    pub fn growth() {
+        
     }
 }
 
@@ -73,13 +126,13 @@ struct Node {
 }
 
 impl Node {
-    pub fn new(position: Vector2<f32>) -> Node {
+    pub fn new(position: Vector2<f32>, max_speed: f32, max_force: f32) -> Node {
         Node {
             position,
             velocity: Vector2::new(0.0, 0.0),
             acceleration: Vector2::new(0.0, 0.0),
-            max_speed: 2.0,
-            max_force: 0.03,
+            max_speed,
+            max_force,
         }
     }
 
@@ -98,6 +151,6 @@ impl Node {
         let mut desired: Vector2<f32> = target.sub(self.position);
         desired.set_magnitude(self.max_speed);
         let steer: Vector2<f32> = desired.sub(self.velocity);
-        return steer.cap_magnitude(self.max_force)
+        return steer.cap_magnitude(self.max_force);
     }
 }
