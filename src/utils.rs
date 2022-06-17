@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
 use iter_num_tools::{lin_space, LinSpace};
-use nalgebra::Vector2;
+use nalgebra:: Point2;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
@@ -26,8 +26,8 @@ pub fn generate_points_of_circle(
     origin_y: f32,
     amount_of_points: usize,
     radius: f32,
-) -> Vec<Vector2<f32>> {
-    let mut points: Vec<Vector2<f32>> = Vec::new();
+) -> Vec<Point2<f32>> {
+    let mut points: Vec<Point2<f32>> = Vec::new();
 
     let h: f32 = origin_x;
     let k: f32 = origin_y;
@@ -39,7 +39,7 @@ pub fn generate_points_of_circle(
     for theta in lin_space {
         let x: f32 = h + radius * f32::cos(theta);
         let y: f32 = k + radius * f32::sin(theta);
-        points.push(Vector2::new(x, y));
+        points.push(Point2::new(x, y));
     }
 
     return points;

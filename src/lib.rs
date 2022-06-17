@@ -1,8 +1,8 @@
 mod utils;
 
-use std::ops::{AddAssign, MulAssign, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign};
 
-use nalgebra::Vector2;
+use nalgebra::{distance, Point2, Vector2};
 use utils::{generate_points_of_circle, set_panic_hook};
 use wasm_bindgen::prelude::*;
 
@@ -39,7 +39,7 @@ pub fn init(
 ) -> Box<[f32]> {
     set_panic_hook();
 
-    let line: Line = Line::new(
+    let mut line: Line = Line::new(
         origin_x,
         origin_y,
         amount_of_points,
@@ -50,6 +50,8 @@ pub fn init(
         1.1,
         5.0,
     );
+
+    line.run();
 
     return line
         .nodes
@@ -64,9 +66,9 @@ struct Line {
     max_force: f32,
     max_speed: f32,
     desired_separation: f32,
-    sq_desired_separation: f32,
-    separation_cohesionRation: f32,
-    max_edge_len: f32,
+    desired_separation_sq: f32,
+    separation_cohesion_ration: f32,
+    max_edge_length: f32,
 }
 
 impl Line {
@@ -84,20 +86,17 @@ impl Line {
         let nodes: Vec<Node> =
             generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
                 .into_iter()
-                .map(|point: Vector2<f32>| Node::new(point, max_speed, max_force))
+                .map(|point: Point2<f32>| Node::new(point, max_speed, max_force))
                 .collect();
         Line {
             nodes,
             max_force,
             max_speed,
             desired_separation,
-            sq_desired_separation: desired_separation.sqrt(),
-            separation_cohesionRation: separation_cohesion_ration,
-            max_edge_len,
+            desired_separation_sq: desired_separation.powi(2),
+            separation_cohesion_ration,
+            max_edge_length: max_edge_len,
         }
-    }
-    pub fn add_node(&mut self, node: Node) {
-        self.nodes.push(node);
     }
 
     pub fn add_node_at(&mut self, node: Node, index: usize) {
@@ -105,20 +104,132 @@ impl Line {
     }
 
     pub fn run(&mut self) {
-
+        self.differentiate();
+        self.growth();
     }
 
-    pub fn differentiate() {
+    pub fn growth(&mut self) {
+        for i in 0..self.nodes.len() - 1 {
+            let n1: &Node = &self.nodes[i];
+            let n2: &Node = &self.nodes[i + 1];
 
+            let distance: f32 = distance(&n1.position, &n2.position);
+
+            if distance > self.max_edge_length {
+                let index: usize = i + 1;
+                let middle_node: Vector2<f32> = n1.position.coords.add(n2.position.coords).div(2.0);
+                self.add_node_at(
+                    Node::new(
+                        Point2::new(middle_node.x, middle_node.y),
+                        self.max_speed,
+                        self.max_force,
+                    ),
+                    index,
+                );
+            }
+        }
     }
 
-    pub fn growth() {
-        
+    pub fn differentiate(&mut self) {
+        let separation_forces: Vec<Vector2<f32>> = self.get_separation_forces();
+        let cohesion_forces: Vec<Vector2<f32>> = self.get_edge_cohesion_forces();
+
+        for i in 0..self.nodes.len() {
+            let mut separation: Vector2<f32> = separation_forces[i];
+            let cohesion: Vector2<f32> = cohesion_forces[i];
+
+            separation.mul_assign(self.separation_cohesion_ration);
+
+            self.nodes[i].apply_force(separation);
+            self.nodes[i].apply_force(cohesion);
+            self.nodes[i].update();
+        }
+    }
+
+    pub fn get_separation_forces(&self) -> Vec<Vector2<f32>> {
+        let n: usize = self.nodes.len();
+        let mut separate_forces: Vec<Vector2<f32>> = Vec::with_capacity(n);
+        let mut near_nodes: Vec<i32> = Vec::with_capacity(n);
+
+        for i in 0..n {
+            let nodei = &self.nodes[i];
+            for j in 0..n {
+                let nodej = &self.nodes[j];
+                let force_ij: Vector2<f32> = self.get_separation_force(nodei, nodej);
+                if force_ij.magnitude() > 0.0 {
+                    separate_forces[i].add_assign(force_ij);
+                    separate_forces[j].sub_assign(force_ij);
+                    near_nodes[i].add_assign(1);
+                    near_nodes[j].add_assign(1);
+                }
+            }
+
+            if near_nodes[i] > 0 {
+                separate_forces[i].div_assign(near_nodes[i] as f32);
+            }
+
+            if separate_forces[i].magnitude() > 0.0 {
+                separate_forces[i].set_magnitude(self.max_speed);
+                separate_forces[i].sub_assign(self.nodes[i].velocity);
+                separate_forces[i] = separate_forces[i].cap_magnitude(self.max_force);
+            }
+
+            return separate_forces;
+        }
+
+        return separate_forces;
+    }
+
+    pub fn get_separation_force(&self, n1: &Node, n2: &Node) -> Vector2<f32> {
+        let mut steer: Vector2<f32> = Vector2::new(0.0, 0.0);
+        let distance: f32 = distance(&n1.position, &n2.position);
+
+        if distance > 0.0 && distance < self.desired_separation {
+            let mut diff: Vector2<f32> = n1.position.sub(n2.position);
+            diff = diff.normalize();
+            diff.div_assign(distance);
+            steer.add_assign(diff);
+        }
+
+        // Optimised version by defering sqrt() to inside if statement.
+        // let distance_sq: f32 = (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
+
+        // if distance_sq > 0.0 && distance_sq < self.desired_separation_sq {
+        //     let mut diff: Vector2<f32> = n1.position.sub(n2.position);
+        //     diff = diff.normalize();
+        //     diff.div_assign(distance_sq.sqrt());
+        //     steer.add_assign(diff);
+        // }
+
+        return steer;
+    }
+
+    pub fn get_edge_cohesion_forces(&self) -> Vec<Vector2<f32>> {
+        let n: usize = self.nodes.len();
+        let mut cohesion_forces: Vec<Vector2<f32>> = Vec::with_capacity(n);
+
+        for i in 0..n {
+            let mut sum: Vector2<f32> = Vector2::new(0.0, 0.0);
+            if i != 0 && i != n - 1 {
+                sum.add_assign(self.nodes[i - 1].position.coords);
+                sum.add_assign(self.nodes[i + 1].position.coords);
+            } else if i == 0 {
+                sum.add_assign(self.nodes[n - 1].position.coords);
+                sum.add_assign(self.nodes[i + 1].position.coords);
+            } else if i == n - 1 {
+                sum.add_assign(self.nodes[i - 1].position.coords);
+                sum.add_assign(self.nodes[0].position.coords);
+            }
+            sum.div_assign(2.0);
+            cohesion_forces[i] = self.nodes[i].seek(sum);
+        }
+
+        return cohesion_forces;
     }
 }
 
 struct Node {
-    position: Vector2<f32>,
+    position: Point2<f32>,
     velocity: Vector2<f32>,
     acceleration: Vector2<f32>,
     max_force: f32,
@@ -126,7 +237,7 @@ struct Node {
 }
 
 impl Node {
-    pub fn new(position: Vector2<f32>, max_speed: f32, max_force: f32) -> Node {
+    pub fn new(position: Point2<f32>, max_speed: f32, max_force: f32) -> Node {
         Node {
             position,
             velocity: Vector2::new(0.0, 0.0),
@@ -147,8 +258,8 @@ impl Node {
         self.acceleration.mul_assign(0.0);
     }
 
-    pub fn seek(&mut self, target: Vector2<f32>) -> Vector2<f32> {
-        let mut desired: Vector2<f32> = target.sub(self.position);
+    pub fn seek(&self, target: Vector2<f32>) -> Vector2<f32> {
+        let mut desired: Vector2<f32> = target.sub(self.position.coords);
         desired.set_magnitude(self.max_speed);
         let steer: Vector2<f32> = desired.sub(self.velocity);
         return steer.cap_magnitude(self.max_force);
