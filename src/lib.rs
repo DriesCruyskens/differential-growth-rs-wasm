@@ -70,7 +70,7 @@ impl Line {
     }
 
     pub fn run(&mut self) {
-        self.differentiate();
+        //self.differentiate();
         self.growth();
     }
 
@@ -96,12 +96,17 @@ impl Line {
     }
 
     pub fn growth(&mut self) {
-        let mut new_nodes: Vec<(Node, usize)> = Vec::with_capacity(self.nodes.len() - 1);
+        let mut new_nodes: Vec<(Node, usize)> = Vec::with_capacity(self.nodes.len());
         let mut amount_nodes_added = 0;
 
-        for i in 0..self.nodes.len() - 1 {
+        for i in 0..self.nodes.len() {
             let n1: &Node = &self.nodes[i];
-            let n2: &Node = &self.nodes[i + 1];
+            // Wrapping around to 0 if we are on last i.
+            let n2: &Node = if i == self.nodes.len() - 1 {
+                &self.nodes[0]
+            } else {
+                &self.nodes[i + 1]
+            };
 
             let distance: f32 = distance(&n1.position, &n2.position);
 
