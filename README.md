@@ -1,3 +1,20 @@
+## Differential Line with Rust WASM
+
+### References
+ 
+- <https://rustwasm.github.io/docs/book/game-of-life/implementing.html>
+- <https://rustwasm.github.io/docs/wasm-bindgen/examples/index.html>
+- <http://www.codeplastic.com/2017/07/22/differential-line-growth-with-processing/>
+- <https://processing.org/examples/flocking.html>
+- <https://inconvergent.net/2016/shepherding-random-growth/>
+- <https://inconvergent.net/generative/differential-line/>
+- <http://www.dgp.toronto.edu/~karan/artexhibit/mazes.pdf>
+
+### TODOS
+maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/
+Yew is not suited because I want to use DatGui anyway
+
+
 <div align="center">
 
   <h1><code>wasm-pack-template</code></h1>
