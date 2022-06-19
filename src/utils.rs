@@ -22,23 +22,23 @@ pub fn set_panic_hook() {
 
 // https://www.mathopenref.com/coordcirclealgorithm.html
 pub fn generate_points_of_circle(
-    origin_x: f32,
-    origin_y: f32,
+    origin_x: f64,
+    origin_y: f64,
     amount_of_points: usize,
-    radius: f32,
-) -> Vec<Point2<f32>> {
-    let mut points: Vec<Point2<f32>> = Vec::new();
+    radius: f64,
+) -> Vec<Point2<f64>> {
+    let mut points: Vec<Point2<f64>> = Vec::new();
 
-    let h: f32 = origin_x;
-    let k: f32 = origin_y;
+    let h: f64 = origin_x;
+    let k: f64 = origin_y;
 
-    let two_pi = 2.0 * PI as f32;
-    let step = two_pi / amount_of_points as f32;
-    let mut theta: f32 = 0.0;
+    let two_pi = 2.0 * PI as f64;
+    let step = two_pi / amount_of_points as f64;
+    let mut theta: f64 = 0.0;
 
     while theta < two_pi {
-        let x: f32 = h + radius * f32::cos(theta);
-        let y: f32 = k + radius * f32::sin(theta);
+        let x: f64 = h + radius * f64::cos(theta);
+        let y: f64 = k + radius * f64::sin(theta);
         points.push(Point2::new(x, y));
         theta.add_assign(step);
     }

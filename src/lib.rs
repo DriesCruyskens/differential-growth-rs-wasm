@@ -30,33 +30,33 @@ pub fn main() {
 #[wasm_bindgen]
 pub struct Line {
     nodes: Vec<Node>,
-    max_force: f32,
-    max_speed: f32,
-    desired_separation: f32,
-    desired_separation_sq: f32,
-    separation_cohesion_ration: f32,
-    max_edge_length: f32,
+    max_force: f64,
+    max_speed: f64,
+    desired_separation: f64,
+    desired_separation_sq: f64,
+    separation_cohesion_ration: f64,
+    max_edge_length: f64,
 }
 
 #[wasm_bindgen]
 impl Line {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        origin_x: f32,
-        origin_y: f32,
+        origin_x: f64,
+        origin_y: f64,
         amount_of_points: usize,
-        radius: f32,
-        max_force: f32,
-        max_speed: f32,
-        desired_separation: f32,
-        separation_cohesion_ration: f32,
-        max_edge_len: f32,
+        radius: f64,
+        max_force: f64,
+        max_speed: f64,
+        desired_separation: f64,
+        separation_cohesion_ration: f64,
+        max_edge_len: f64,
     ) -> Line {
         // Generate points on a circle and map to Nodes.
         let nodes: Vec<Node> =
             generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
                 .into_iter()
-                .map(|point: Point2<f32>| Node::new(point, max_speed, max_force))
+                .map(|point: Point2<f64>| Node::new(point, max_speed, max_force))
                 .collect();
         Line {
             nodes,
@@ -70,14 +70,14 @@ impl Line {
     }
 
     pub fn run(&mut self) {
-        //self.differentiate();
+        self.differentiate();
         self.growth();
     }
 
     // https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-number-slices.html
-    pub fn export_as_slice(&self) -> Box<[f32]> {
+    pub fn export_as_slice(&self) -> Box<[f64]> {
         let n = self.nodes.len() * 2;
-        let mut export: Vec<f32> = Vec::with_capacity(n);
+        let mut export: Vec<f64> = Vec::with_capacity(n);
 
         for i in 0..self.nodes.len() {
             export.push(self.nodes[i].position.x);
@@ -108,14 +108,14 @@ impl Line {
                 &self.nodes[i + 1]
             };
 
-            let distance: f32 = distance(&n1.position, &n2.position);
+            let distance: f64 = distance(&n1.position, &n2.position);
 
             if distance > self.max_edge_length {
                 // Inserting new nodes shifts the index of the original nodes.
                 // To compensate we shift the index with it.
                 let index: usize = i + 1 + amount_nodes_added;
                 amount_nodes_added.add_assign(1);
-                let middle_node: Vector2<f32> = n1.position.coords.add(n2.position.coords).div(2.0);
+                let middle_node: Vector2<f64> = n1.position.coords.add(n2.position.coords).div(2.0);
                 new_nodes.push((
                     Node::new(
                         Point2::new(middle_node.x, middle_node.y),
@@ -133,12 +133,12 @@ impl Line {
     }
 
     pub fn differentiate(&mut self) {
-        let separation_forces: Vec<Vector2<f32>> = self.get_separation_forces();
-        let cohesion_forces: Vec<Vector2<f32>> = self.get_edge_cohesion_forces();
+        let separation_forces: Vec<Vector2<f64>> = self.get_separation_forces();
+        let cohesion_forces: Vec<Vector2<f64>> = self.get_edge_cohesion_forces();
 
         for i in 0..self.nodes.len() {
-            let mut separation: Vector2<f32> = separation_forces[i];
-            let cohesion: Vector2<f32> = cohesion_forces[i];
+            let mut separation: Vector2<f64> = separation_forces[i];
+            let cohesion: Vector2<f64> = cohesion_forces[i];
 
             separation.mul_assign(self.separation_cohesion_ration);
 
@@ -148,16 +148,16 @@ impl Line {
         }
     }
 
-    pub fn get_separation_forces(&self) -> Vec<Vector2<f32>> {
+    pub fn get_separation_forces(&self) -> Vec<Vector2<f64>> {
         let n: usize = self.nodes.len();
-        let mut separate_forces: Vec<Vector2<f32>> = vec![Vector2::default(); n];
+        let mut separate_forces: Vec<Vector2<f64>> = vec![Vector2::default(); n];
         let mut near_nodes: Vec<i32> = vec![0; n];
 
         for i in 0..n {
             let nodei = &self.nodes[i];
             for j in 0..n {
                 let nodej = &self.nodes[j];
-                let force_ij: Vector2<f32> = self.get_separation_force(nodei, nodej);
+                let force_ij: Vector2<f64> = self.get_separation_force(nodei, nodej);
                 if force_ij.magnitude() > 0.0 {
                     separate_forces[i].add_assign(force_ij);
                     separate_forces[j].sub_assign(force_ij);
@@ -167,7 +167,7 @@ impl Line {
             }
 
             if near_nodes[i] > 0 {
-                separate_forces[i].div_assign(near_nodes[i] as f32);
+                separate_forces[i].div_assign(near_nodes[i] as f64);
             }
 
             if separate_forces[i].magnitude() > 0.0 {
@@ -180,22 +180,22 @@ impl Line {
         return separate_forces;
     }
 
-    pub fn get_separation_force(&self, n1: &Node, n2: &Node) -> Vector2<f32> {
-        let mut steer: Vector2<f32> = Vector2::default();
-        let distance: f32 = distance(&n1.position, &n2.position);
+    pub fn get_separation_force(&self, n1: &Node, n2: &Node) -> Vector2<f64> {
+        let mut steer: Vector2<f64> = Vector2::default();
+        let distance: f64 = distance(&n1.position, &n2.position);
 
         if distance > 0.0 && distance < self.desired_separation {
-            let mut diff: Vector2<f32> = n1.position.sub(n2.position);
+            let mut diff: Vector2<f64> = n1.position.sub(n2.position);
             diff = diff.normalize();
             diff.div_assign(distance);
             steer.add_assign(diff);
         }
 
         // Optimised version by defering sqrt() to inside if statement.
-        // let distance_sq: f32 = (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
+        // let distance_sq: f64 = (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
 
         // if distance_sq > 0.0 && distance_sq < self.desired_separation_sq {
-        //     let mut diff: Vector2<f32> = n1.position.sub(n2.position);
+        //     let mut diff: Vector2<f64> = n1.position.sub(n2.position);
         //     diff = diff.normalize();
         //     diff.div_assign(distance_sq.sqrt());
         //     steer.add_assign(diff);
@@ -204,12 +204,12 @@ impl Line {
         return steer;
     }
 
-    pub fn get_edge_cohesion_forces(&self) -> Vec<Vector2<f32>> {
+    pub fn get_edge_cohesion_forces(&self) -> Vec<Vector2<f64>> {
         let n: usize = self.nodes.len();
-        let mut cohesion_forces: Vec<Vector2<f32>> = vec![Vector2::default(); n];
+        let mut cohesion_forces: Vec<Vector2<f64>> = Vec::with_capacity(n);
 
         for i in 0..n {
-            let mut sum: Vector2<f32> = Vector2::default();
+            let mut sum: Vector2<f64> = Vector2::default();
             if i != 0 && i != n - 1 {
                 sum.add_assign(self.nodes[i - 1].position.coords);
                 sum.add_assign(self.nodes[i + 1].position.coords);
@@ -221,23 +221,22 @@ impl Line {
                 sum.add_assign(self.nodes[0].position.coords);
             }
             sum.div_assign(2.0);
-            cohesion_forces[i] = self.nodes[i].seek(sum);
+            cohesion_forces.push(self.nodes[i].seek(sum));
         }
-
         return cohesion_forces;
     }
 }
 
 pub struct Node {
-    position: Point2<f32>,
-    velocity: Vector2<f32>,
-    acceleration: Vector2<f32>,
-    max_force: f32,
-    max_speed: f32,
+    position: Point2<f64>,
+    velocity: Vector2<f64>,
+    acceleration: Vector2<f64>,
+    max_force: f64,
+    max_speed: f64,
 }
 
 impl Node {
-    pub fn new(position: Point2<f32>, max_speed: f32, max_force: f32) -> Node {
+    pub fn new(position: Point2<f64>, max_speed: f64, max_force: f64) -> Node {
         Node {
             position,
             velocity: Vector2::default(),
@@ -247,7 +246,7 @@ impl Node {
         }
     }
 
-    pub fn apply_force(&mut self, force: Vector2<f32>) {
+    pub fn apply_force(&mut self, force: Vector2<f64>) {
         self.acceleration.add_assign(force);
     }
 
@@ -258,10 +257,10 @@ impl Node {
         self.acceleration.mul_assign(0.0);
     }
 
-    pub fn seek(&self, target: Vector2<f32>) -> Vector2<f32> {
-        let mut desired: Vector2<f32> = target.sub(self.position.coords);
+    pub fn seek(&self, target: Vector2<f64>) -> Vector2<f64> {
+        let mut desired: Vector2<f64> = target.sub(self.position.coords);
         desired.set_magnitude(self.max_speed);
-        let steer: Vector2<f32> = desired.sub(self.velocity);
+        let steer: Vector2<f64> = desired.sub(self.velocity);
         return steer.cap_magnitude(self.max_force);
     }
 }
@@ -269,7 +268,7 @@ impl Node {
 impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Point")
-            .field("pos", &self.position)
+            .field("pos", &self.position.coords)
             .field("vel", &self.velocity)
             .field("acc", &self.acceleration)
             .finish()
