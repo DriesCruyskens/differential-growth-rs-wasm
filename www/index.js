@@ -111,12 +111,19 @@ window.onload = function () {
 function initSegments(amountOfPoints, r) {
     let segments = []
 
-    let arr = wasm.init(
+    let line = new wasm.Line(
         paper.view.center.x,
         paper.view.center.y,
         amountOfPoints,
-        r
+        r,
+        0.2,
+        2.0,
+        10.0,
+        1.1,
+        5.0,
     )
+
+    let arr = line.export_as_slice();
 
     for (let i = 0; i < arr.length; i = i + 2) {
         let point = new paper.Point(arr[i], arr[i + 1])

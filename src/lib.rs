@@ -19,46 +19,12 @@ macro_rules! log {
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, differential-growth!");
-}
-
 #[wasm_bindgen(start)]
 pub fn main() {
     set_panic_hook();
 }
 
 #[wasm_bindgen]
-pub fn init(
-    origin_x: f32,
-    origin_y: f32,
-    amount_of_points: usize,
-    radius: f32,
-    // https://rustwasm.github.io/wasm-bindgen/reference/types/boxed-number-slices.html
-) -> Box<[f32]> {
-    let mut line: Line = Line::new(
-        origin_x,
-        origin_y,
-        amount_of_points,
-        radius,
-        0.2,
-        2.0,
-        10.0,
-        1.1,
-        5.0,
-    );
-
-    line.run();
-
-    return Line::export_as_slice(line.nodes);
-}
-
 pub struct Line {
     nodes: Vec<Node>,
     max_force: f32,
@@ -69,7 +35,9 @@ pub struct Line {
     max_edge_length: f32,
 }
 
+#[wasm_bindgen]
 impl Line {
+    #[wasm_bindgen(constructor)]
     pub fn new(
         origin_x: f32,
         origin_y: f32,
@@ -98,25 +66,31 @@ impl Line {
         }
     }
 
-    pub fn export_as_slice(nodes: Vec<Node>) -> Box<[f32]> {
-        let n = nodes.len() * 2;
+    pub fn run(&mut self) {
+        self.differentiate();
+        self.growth();
+    }
+
+    // https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-number-slices.html
+    pub fn export_as_slice(&self) -> Box<[f32]> {
+        let n = self.nodes.len() * 2;
         let mut export: Vec<f32> = Vec::with_capacity(n);
 
-        for i in 0..nodes.len() {
-            export.push(nodes[i].position.x);
-            export.push(nodes[i].position.y);
+        for i in 0..self.nodes.len() {
+            export.push(self.nodes[i].position.x);
+            export.push(self.nodes[i].position.y);
         }
 
         return export.into_boxed_slice();
     }
 
+}
+
+// Having two different `impl Line` sections because wasm_bindgen attribute macro
+// is not supporting Vectors from nalgebra
+impl Line {
     pub fn add_node_at(&mut self, node: Node, index: usize) {
         self.nodes.insert(index, node);
-    }
-
-    pub fn run(&mut self) {
-        self.differentiate();
-        self.growth();
     }
 
     pub fn growth(&mut self) {
