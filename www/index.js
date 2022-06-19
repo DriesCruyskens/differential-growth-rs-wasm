@@ -10,12 +10,12 @@ const gui = new dat.GUI();
 let totalSteps = 1000;
 let currentStep = 0;
 
-let radius = 100;
-let amountOfPoints = 200;
+let radius = 10;
+let amountOfPoints = 10;
 
-let max_force = 0.2;
-let max_speed = 2.0;
-let desired_separation = 10.0;
+let max_force = 0.9;
+let max_speed = 1.0;
+let desired_separation = 9.0;
 let separation_cohesion_ratio = 1.1;
 let max_edge_length = 5.0;
 
@@ -28,7 +28,7 @@ window.onload = function () {
     let path = new paper.Path();
     path.strokeColor = 'black';
     path.closed = true
-    path.selected = true;
+    //path.selected = true;
 
     let line = new wasm.Line(
         paper.view.center.x,
@@ -53,7 +53,7 @@ window.onload = function () {
         path.removeSegments()
         path.addSegments(getSegments(line))
 
-        path.smooth()
+        // path.smooth()
 
         currentStep = currentStep + 1
         requestAnimationFrame(animationLoop);
@@ -68,6 +68,9 @@ function getSegments(line) {
 
     for (let i = 0; i < arr.length; i = i + 2) {
         let point = new paper.Point(arr[i], arr[i + 1])
+        // if (isNaN(point.x)) {
+        //     debugger;
+        // }
         // let vector = point.subtract(paper.view.center);
         // segments.push(point.add(vector.multiply(Math.random() / 100)))
         segments.push(point)
