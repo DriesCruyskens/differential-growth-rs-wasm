@@ -1,6 +1,9 @@
 mod utils;
 
-use std::{ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign}, fmt};
+use std::{
+    fmt,
+    ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign},
+};
 
 use nalgebra::{distance, Point2, Vector2};
 use utils::{generate_points_of_circle, set_panic_hook};
@@ -83,7 +86,6 @@ impl Line {
 
         return export.into_boxed_slice();
     }
-
 }
 
 // Having two different `impl Line` sections because wasm_bindgen attribute macro
@@ -94,6 +96,9 @@ impl Line {
     }
 
     pub fn growth(&mut self) {
+        let mut new_nodes: Vec<(Node, usize)> = Vec::with_capacity(self.nodes.len() - 1);
+        let mut amount_nodes_added = 0;
+
         for i in 0..self.nodes.len() - 1 {
             let n1: &Node = &self.nodes[i];
             let n2: &Node = &self.nodes[i + 1];
@@ -101,17 +106,24 @@ impl Line {
             let distance: f32 = distance(&n1.position, &n2.position);
 
             if distance > self.max_edge_length {
-                let index: usize = i + 1;
+                // Inserting new nodes shifts the index of the original nodes.
+                // To compensate we shift the index with it.
+                let index: usize = i + 1 + amount_nodes_added;
+                amount_nodes_added.add_assign(1);
                 let middle_node: Vector2<f32> = n1.position.coords.add(n2.position.coords).div(2.0);
-                self.add_node_at(
+                new_nodes.push((
                     Node::new(
                         Point2::new(middle_node.x, middle_node.y),
                         self.max_speed,
                         self.max_force,
                     ),
                     index,
-                );
+                ));
             }
+        }
+
+        for new_node in new_nodes {
+            self.add_node_at(new_node.0, new_node.1);
         }
     }
 
@@ -254,9 +266,9 @@ impl Node {
 impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Point")
-         .field("pos", &self.position)
-         .field("vel", &self.velocity)
-         .field("acc", &self.acceleration)
-         .finish()
+            .field("pos", &self.position)
+            .field("vel", &self.velocity)
+            .field("acc", &self.acceleration)
+            .finish()
     }
 }
