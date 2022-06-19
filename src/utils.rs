@@ -21,6 +21,7 @@ pub fn set_panic_hook() {
     console_error_panic_hook::set_once();
 }
 
+// https://www.mathopenref.com/coordcirclealgorithm.html
 pub fn generate_points_of_circle(
     origin_x: f32,
     origin_y: f32,
