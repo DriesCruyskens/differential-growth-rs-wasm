@@ -59,7 +59,7 @@ pub fn init(
     return Line::export_as_slice(line.nodes);
 }
 
-struct Line {
+pub struct Line {
     nodes: Vec<Node>,
     max_force: f32,
     max_speed: f32,
@@ -239,7 +239,7 @@ impl Line {
     }
 }
 
-struct Node {
+pub struct Node {
     position: Point2<f32>,
     velocity: Vector2<f32>,
     acceleration: Vector2<f32>,
