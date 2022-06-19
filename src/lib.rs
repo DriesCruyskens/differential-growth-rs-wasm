@@ -29,6 +29,11 @@ pub fn greet() {
     alert("Hello, differential-growth!");
 }
 
+#[wasm_bindgen(start)]
+pub fn main() {
+    set_panic_hook();
+}
+
 #[wasm_bindgen]
 pub fn init(
     origin_x: f32,
@@ -37,8 +42,6 @@ pub fn init(
     radius: f32,
     // https://rustwasm.github.io/wasm-bindgen/reference/types/boxed-number-slices.html
 ) -> Box<[f32]> {
-    set_panic_hook();
-
     let mut line: Line = Line::new(
         origin_x,
         origin_y,
