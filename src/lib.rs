@@ -170,8 +170,6 @@ impl Line {
                 separate_forces[i].sub_assign(self.nodes[i].velocity);
                 separate_forces[i] = separate_forces[i].cap_magnitude(self.max_force);
             }
-
-            return separate_forces;
         }
 
         return separate_forces;
