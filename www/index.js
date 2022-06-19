@@ -7,11 +7,18 @@ const gui = new dat.GUI();
 
 // wasm.greet();
 
-let totalSteps = 150;
+let totalSteps = 1000;
 let currentStep = 0;
 
-let radius = 200
-let amountOfPoints = 400
+let radius = 100;
+let amountOfPoints = 200;
+
+let max_force = 0.2;
+let max_speed = 2.0;
+let desired_separation = 10.0;
+let separation_cohesion_ratio = 1.1;
+let max_edge_length = 5.0;
+
 
 // Only executed our code once the DOM is ready.
 window.onload = function () {
@@ -21,18 +28,18 @@ window.onload = function () {
     let path = new paper.Path();
     path.strokeColor = 'black';
     path.closed = true
-    //path.selected = true;
+    path.selected = true;
 
     let line = new wasm.Line(
         paper.view.center.x,
         paper.view.center.y,
         amountOfPoints,
         radius,
-        0.2,
-        2.0,
-        10.0,
-        1.1,
-        5.0,
+        max_force,
+        max_speed,
+        desired_separation,
+        separation_cohesion_ratio,
+        max_edge_length,
     )
 
     // Loop
