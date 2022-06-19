@@ -71,7 +71,7 @@ impl Line {
 
     pub fn run(&mut self) {
         self.differentiate();
-        self.growth();
+        //self.growth();
     }
 
     // https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-number-slices.html
@@ -182,24 +182,24 @@ impl Line {
 
     pub fn get_separation_force(&self, n1: &Node, n2: &Node) -> Vector2<f64> {
         let mut steer: Vector2<f64> = Vector2::default();
-        let distance: f64 = distance(&n1.position, &n2.position);
+        // let distance: f64 = distance(&n1.position, &n2.position);
 
-        if distance > 0.0 && distance < self.desired_separation {
-            let mut diff: Vector2<f64> = n1.position.sub(n2.position);
-            diff = diff.normalize();
-            diff.div_assign(distance);
-            steer.add_assign(diff);
-        }
-
-        // Optimised version by defering sqrt() to inside if statement.
-        // let distance_sq: f64 = (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
-
-        // if distance_sq > 0.0 && distance_sq < self.desired_separation_sq {
+        // if distance > 0.0 && distance < self.desired_separation {
         //     let mut diff: Vector2<f64> = n1.position.sub(n2.position);
         //     diff = diff.normalize();
-        //     diff.div_assign(distance_sq.sqrt());
+        //     diff.div_assign(distance);
         //     steer.add_assign(diff);
         // }
+
+        // Optimised version by defering sqrt() to inside if statement.
+        let distance_sq: f64 = (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
+
+        if distance_sq > 0.0 && distance_sq < self.desired_separation_sq {
+            let mut diff: Vector2<f64> = n1.position.sub(n2.position);
+            diff = diff.normalize();
+            diff.div_assign(distance_sq.sqrt());
+            steer.add_assign(diff);
+        }
 
         return steer;
     }
