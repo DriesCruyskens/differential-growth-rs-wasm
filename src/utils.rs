@@ -1,7 +1,6 @@
-use std::f64::consts::PI;
+use std::{f64::consts::PI, ops::AddAssign};
 
-use iter_num_tools::{lin_space, LinSpace};
-use nalgebra:: Point2;
+use nalgebra::Point2;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
@@ -33,14 +32,15 @@ pub fn generate_points_of_circle(
     let h: f32 = origin_x;
     let k: f32 = origin_y;
 
-    let two_pi: f32 = 2.0 * PI as f32;
+    let two_pi = 2.0 * PI as f32;
+    let step = two_pi / amount_of_points as f32;
+    let mut theta: f32 = 0.0;
 
-    let lin_space: LinSpace<f32> = lin_space(0.0..=two_pi, amount_of_points);
-
-    for theta in lin_space {
+    while theta < two_pi {
         let x: f32 = h + radius * f32::cos(theta);
         let y: f32 = k + radius * f32::sin(theta);
         points.push(Point2::new(x, y));
+        theta.add_assign(step);
     }
 
     return points;

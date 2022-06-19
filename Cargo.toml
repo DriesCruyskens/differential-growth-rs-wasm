@@ -15,7 +15,6 @@ wasm-bindgen = "0.2.63"
 js-sys = "0.3.57"
 web-sys = { version = "0.3.57", features = ["console"] }
 nalgebra = "0.31.0"
-iter_num_tools = { version = "0.6.2"}
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
