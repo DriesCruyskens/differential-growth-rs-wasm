@@ -71,7 +71,7 @@ impl Line {
 
     pub fn run(&mut self) {
         self.differentiate();
-        //self.growth();
+        self.growth();
     }
 
     // https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-number-slices.html
@@ -192,7 +192,8 @@ impl Line {
         // }
 
         // Optimised version by defering sqrt() to inside if statement.
-        let distance_sq: f64 = (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
+        let distance_sq: f64 =
+            (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
 
         if distance_sq > 0.0 && distance_sq < self.desired_separation_sq {
             let mut diff: Vector2<f64> = n1.position.sub(n2.position);
@@ -259,7 +260,9 @@ impl Node {
 
     pub fn seek(&self, target: Vector2<f64>) -> Vector2<f64> {
         let mut desired: Vector2<f64> = target.sub(self.position.coords);
-        desired.set_magnitude(self.max_speed);
+        if desired.magnitude() != 0.0 {
+            desired.set_magnitude(self.max_speed);
+        }
         let steer: Vector2<f64> = desired.sub(self.velocity);
         return steer.cap_magnitude(self.max_force);
     }
