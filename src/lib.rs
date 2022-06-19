@@ -1,6 +1,6 @@
 mod utils;
 
-use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign};
+use std::{ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign}, fmt};
 
 use nalgebra::{distance, Point2, Vector2};
 use utils::{generate_points_of_circle, set_panic_hook};
@@ -248,5 +248,15 @@ impl Node {
         desired.set_magnitude(self.max_speed);
         let steer: Vector2<f32> = desired.sub(self.velocity);
         return steer.cap_magnitude(self.max_force);
+    }
+}
+
+impl fmt::Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Point")
+         .field("pos", &self.position)
+         .field("vel", &self.velocity)
+         .field("acc", &self.acceleration)
+         .finish()
     }
 }
