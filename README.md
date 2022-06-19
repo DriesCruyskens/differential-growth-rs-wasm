@@ -9,6 +9,7 @@
 - <https://inconvergent.net/2016/shepherding-random-growth/>
 - <https://inconvergent.net/generative/differential-line/>
 - <http://www.dgp.toronto.edu/~karan/artexhibit/mazes.pdf>
+- <https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html>
 
 ### TODOS
 maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/
