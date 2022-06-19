@@ -33,7 +33,7 @@ window.onload = function () {
     console.log(path)
 
     // Loop
-    function repeatOften() {
+    function animationLoop() {
         console.log(totalSteps, currentStep)
         if (currentStep > totalSteps) {
             return
@@ -101,9 +101,9 @@ window.onload = function () {
         // })
 
         currentStep = currentStep + 1
-        requestAnimationFrame(repeatOften);
+        requestAnimationFrame(animationLoop);
       }
-      requestAnimationFrame(repeatOften);
+      requestAnimationFrame(animationLoop);
 }
 
 // Generates the point of a circle
