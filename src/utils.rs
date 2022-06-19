@@ -32,7 +32,7 @@ pub fn generate_points_of_circle(
     let h: f32 = origin_x;
     let k: f32 = origin_y;
 
-    let two_pi: f32 = (2.0 * PI as f32).round();
+    let two_pi: f32 = 2.0 * PI as f32;
 
     let lin_space: LinSpace<f32> = lin_space(0.0..=two_pi, amount_of_points);
 

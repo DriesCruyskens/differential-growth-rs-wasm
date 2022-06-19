@@ -53,12 +53,7 @@ pub fn init(
 
     line.run();
 
-    return line
-        .nodes
-        .into_iter()
-        .map(|node| node.position.y)
-        .collect::<Vec<f32>>()
-        .into_boxed_slice();
+    return Line::export_as_slice(line.nodes);
 }
 
 struct Line {
@@ -83,6 +78,7 @@ impl Line {
         separation_cohesion_ration: f32,
         max_edge_len: f32,
     ) -> Line {
+        // Generate points on a circle and map to Nodes.
         let nodes: Vec<Node> =
             generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
                 .into_iter()
@@ -97,6 +93,18 @@ impl Line {
             separation_cohesion_ration,
             max_edge_length: max_edge_len,
         }
+    }
+
+    pub fn export_as_slice(nodes: Vec<Node>) -> Box<[f32]> {
+        let n = nodes.len() * 2;
+        let mut export: Vec<f32> = Vec::with_capacity(n);
+
+        for i in 0..nodes.len() {
+            export.push(nodes[i].position.x);
+            export.push(nodes[i].position.y);
+        }
+
+        return export.into_boxed_slice();
     }
 
     pub fn add_node_at(&mut self, node: Node, index: usize) {
@@ -148,8 +156,8 @@ impl Line {
 
     pub fn get_separation_forces(&self) -> Vec<Vector2<f32>> {
         let n: usize = self.nodes.len();
-        let mut separate_forces: Vec<Vector2<f32>> = Vec::with_capacity(n);
-        let mut near_nodes: Vec<i32> = Vec::with_capacity(n);
+        let mut separate_forces: Vec<Vector2<f32>> = vec![Vector2::default(); n];
+        let mut near_nodes: Vec<i32> = vec![0; n];
 
         for i in 0..n {
             let nodei = &self.nodes[i];
@@ -181,7 +189,7 @@ impl Line {
     }
 
     pub fn get_separation_force(&self, n1: &Node, n2: &Node) -> Vector2<f32> {
-        let mut steer: Vector2<f32> = Vector2::new(0.0, 0.0);
+        let mut steer: Vector2<f32> = Vector2::default();
         let distance: f32 = distance(&n1.position, &n2.position);
 
         if distance > 0.0 && distance < self.desired_separation {
@@ -206,10 +214,10 @@ impl Line {
 
     pub fn get_edge_cohesion_forces(&self) -> Vec<Vector2<f32>> {
         let n: usize = self.nodes.len();
-        let mut cohesion_forces: Vec<Vector2<f32>> = Vec::with_capacity(n);
+        let mut cohesion_forces: Vec<Vector2<f32>> = vec![Vector2::default(); n];
 
         for i in 0..n {
-            let mut sum: Vector2<f32> = Vector2::new(0.0, 0.0);
+            let mut sum: Vector2<f32> = Vector2::default();
             if i != 0 && i != n - 1 {
                 sum.add_assign(self.nodes[i - 1].position.coords);
                 sum.add_assign(self.nodes[i + 1].position.coords);
@@ -240,8 +248,8 @@ impl Node {
     pub fn new(position: Point2<f32>, max_speed: f32, max_force: f32) -> Node {
         Node {
             position,
-            velocity: Vector2::new(0.0, 0.0),
-            acceleration: Vector2::new(0.0, 0.0),
+            velocity: Vector2::default(),
+            acceleration: Vector2::default(),
             max_speed,
             max_force,
         }
