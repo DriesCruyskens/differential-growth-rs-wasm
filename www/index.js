@@ -5,7 +5,6 @@ import { saveAs } from "file-saver";
 
 const gui = new dat.GUI();
 
-// wasm.greet();
 
 let totalSteps = 300;
 let currentStep = 0;
@@ -70,17 +69,13 @@ function getSegments(line) {
 
     for (let i = 0; i < arr.length; i = i + 2) {
         let point = new paper.Point(arr[i], arr[i + 1])
-        // if (isNaN(point.x)) {
-        //     debugger;
-        // }
-        // let vector = point.subtract(paper.view.center);
-        // segments.push(point.add(vector.multiply(Math.random() / 100)))
         segments.push(point)
     }
 
     return segments
 }
 
+// https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html
 const fps = new class {
     constructor() {
       this.fps = document.getElementById("fps");
