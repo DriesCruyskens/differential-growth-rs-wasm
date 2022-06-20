@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>Differential Growth</title>
     <style>
       html {
-        background-color: #DDD;
+        background-color: #ddd;
       }
 
       html,
@@ -46,11 +46,20 @@
       .infobox a svg:hover {
         opacity: 1;
       }
+
+      #fps {
+        white-space: pre;
+        font-family: monospace;
+      }
     </style>
   </head>
   <body>
+    <div id="fps"></div>
     <canvas id="paper-canvas" resize></canvas>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+    <noscript>
+      This page contains webassembly and javascript content, please enable
+      javascript in your browser.
+    </noscript>
     <script src="./bootstrap.js"></script>
   </body>
 </html>
