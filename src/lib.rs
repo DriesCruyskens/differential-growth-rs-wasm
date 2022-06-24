@@ -143,8 +143,8 @@ impl Line {
 
             separation.mul_assign(self.separation_cohesion_ration);
 
-            self.nodes[i].apply_force(separation);
-            self.nodes[i].apply_force(cohesion);
+            self.nodes[i].apply_force(&separation);
+            self.nodes[i].apply_force(&cohesion);
             self.nodes[i].update();
         }
     }
@@ -223,7 +223,7 @@ impl Line {
                 sum.add_assign(self.nodes[0].position.coords);
             }
             sum.div_assign(2.0);
-            cohesion_forces.push(self.nodes[i].seek(sum));
+            cohesion_forces.push(self.nodes[i].seek(&sum));
         }
         return cohesion_forces;
     }
@@ -248,7 +248,7 @@ impl Node {
         }
     }
 
-    pub fn apply_force(&mut self, force: Vector2<f64>) {
+    pub fn apply_force(&mut self, force: &Vector2<f64>) {
         self.acceleration.add_assign(force);
     }
 
@@ -259,7 +259,7 @@ impl Node {
         self.acceleration.mul_assign(0.0);
     }
 
-    pub fn seek(&self, target: Vector2<f64>) -> Vector2<f64> {
+    pub fn seek(&self, target: &Vector2<f64>) -> Vector2<f64> {
         let mut desired: Vector2<f64> = target.sub(self.position.coords);
         if desired.magnitude() != 0.0 {
             desired.set_magnitude(self.max_speed);
