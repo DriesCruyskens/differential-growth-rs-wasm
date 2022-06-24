@@ -69,9 +69,10 @@ impl Line {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Box<[f64]> {
         self.differentiate();
         self.growth();
+        self.export_as_slice()
     }
 
     // https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-number-slices.html

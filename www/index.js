@@ -3,19 +3,31 @@ import * as dat from "dat.gui";
 import * as paper from "paper";
 import { saveAs } from "file-saver";
 
-const gui = new dat.GUI();
+const gui = new dat.GUI({
+  name: "Differential Line",
+  autoPlace: true,
+  closeOnTop: false,
+});
 
-let totalSteps = 300;
+let params = {
+  totalSteps: 300,
+
+  debug: false,
+  smoothPath: false,
+
+  radius: 10,
+  amountOfPoints: 10,
+
+  maxForce: 0.9,
+  maxSpeed: 1.0,
+  desiredSeparation: 9.0,
+  separationCohesionRatio: 1.1,
+  maxEdgeLength: 5.0,
+};
+
 let currentStep = 0;
 
-let radius = 10;
-let amountOfPoints = 10;
-
-let max_force = 0.9;
-let max_speed = 1.0;
-let desired_separation = 9.0;
-let separation_cohesion_ratio = 1.1;
-let max_edge_length = 5.0;
+let line;
 
 // Only executed our code once the DOM is ready.
 window.onload = function () {
@@ -25,53 +37,143 @@ window.onload = function () {
   let path = new paper.Path();
   path.strokeColor = "black";
   path.closed = true;
-  //path.selected = true;
 
-  let line = new wasm.Line(
-    paper.view.center.x,
-    paper.view.center.y,
-    amountOfPoints,
-    radius,
-    max_force,
-    max_speed,
-    desired_separation,
-    separation_cohesion_ratio,
-    max_edge_length
-  );
+  params.reset = function() {
+    path.selected = params.debug;
+
+    line = new wasm.Line(
+      paper.view.center.x,
+      paper.view.center.y,
+      params.amountOfPoints,
+      params.radius,
+      params.maxForce,
+      params.maxSpeed,
+      params.desiredSeparation,
+      params.separationCohesionRatio,
+      params.maxEdgeLength
+    );
+
+    currentStep = 0;
+    requestAnimationFrame(animationLoop);
+  }
+
+  params.reset();
+  initGui();
 
   // Loop
   function animationLoop() {
     fps.render();
 
-    if (currentStep > totalSteps) {
+    if (currentStep > params.totalSteps) {
       return;
     }
 
-    line.run();
-
     path.removeSegments();
-    path.addSegments(getSegments(line));
+    path.addSegments(getSegments(line.run()));
 
-    // path.smooth()
+    if (params.smoothPath) {
+      path.smooth();
+    }
 
     currentStep = currentStep + 1;
     requestAnimationFrame(animationLoop);
   }
-  requestAnimationFrame(animationLoop);
-};
 
-function getSegments(line) {
-  let segments = [];
+  function getSegments(arr) {
+    let segments = [];
 
-  let arr = line.export_as_slice();
+    for (let i = 0; i < arr.length; i = i + 2) {
+      let point = new paper.Point(arr[i], arr[i + 1]);
+      segments.push(point);
+    }
 
-  for (let i = 0; i < arr.length; i = i + 2) {
-    let point = new paper.Point(arr[i], arr[i + 1]);
-    segments.push(point);
+    return segments;
   }
 
-  return segments;
-}
+  function initGui() {
+    gui.add(params, "reset").name("Run");
+
+    gui
+      .add(params, "totalSteps", 0, 1000)
+      .listen()
+      .onChange((value) => {
+        params.totalSteps = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "debug")
+      .listen()
+      .onChange((value) => {
+        params.debug = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "smoothPath")
+      .listen()
+      .onChange((value) => {
+        params.smoothPath = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "radius", 0, 300)
+      .listen()
+      .onChange((value) => {
+        params.radius = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "amountOfPoints", 0, 100)
+      .listen()
+      .onChange((value) => {
+        params.amountOfPoints = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "maxForce", 0, 2)
+      .listen()
+      .onChange((value) => {
+        params.maxForce = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "maxSpeed", 0, 2)
+      .listen()
+      .onChange((value) => {
+        params.maxSpeed = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "desiredSeparation", 0, 50)
+      .listen()
+      .onChange((value) => {
+        params.desiredSeparation = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "separationCohesionRatio", 0, 2)
+      .listen()
+      .onChange((value) => {
+        params.separationCohesionRatio = value;
+        params.reset();
+      });
+
+    gui
+      .add(params, "maxEdgeLength", 0, 30)
+      .listen()
+      .onChange((value) => {
+        params.maxEdgeLength = value;
+        params.reset();
+      });
+  }
+};
 
 // https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html
 const fps = new (class {
