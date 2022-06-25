@@ -20,8 +20,8 @@ let params = {
 
   maxForce: 1.5,
   maxSpeed: 1.0,
-  desiredSeparation: 9.0,
-  separationCohesionRatio: 0.9,
+  desiredSeparation: 14,
+  separationCohesionRatio: 1.1,
   maxEdgeLength: 5.0,
 };
 
@@ -43,7 +43,6 @@ window.onload = function () {
 
   params.stop = function() {
     currentStep = params.maxSteps + 1;
-    console.log(params.currentStep)
   }
 
   params.reset = function() {

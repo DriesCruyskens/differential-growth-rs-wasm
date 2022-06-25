@@ -5,6 +5,7 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign},
 };
 
+use kd_tree::{KdPoint, KdTree2};
 use nalgebra::{distance, Point2, Vector2};
 use utils::{generate_points_of_circle, set_panic_hook};
 use wasm_bindgen::prelude::*;
@@ -143,32 +144,34 @@ impl Line {
     }
 
     pub fn get_separation_forces(&self) -> Vec<Vector2<f64>> {
-        let n: usize = self.nodes.len();
-        let mut separate_forces: Vec<Vector2<f64>> = vec![Vector2::default(); n];
-        let mut near_nodes: Vec<i32> = vec![0; n];
+        // Constructing a kdtree each frame so we can optimise looking for neighbors.
+        // This technique is the single most important optimisation we can do.
+        let kdtree = KdTree2::build_by_ordered_float(self.nodes.clone());
 
-        for i in 0..n {
+        let nodes_len: usize = self.nodes.len();
+        let mut separate_forces: Vec<Vector2<f64>> = vec![Vector2::default(); nodes_len];
+
+        for i in 0..nodes_len {
             let nodei = &self.nodes[i];
-            for j in 0..n {
-                let nodej = &self.nodes[j];
-                let force_ij: Vector2<f64> = self.get_separation_force(nodei, nodej);
-                if force_ij.magnitude() > 0.0 {
-                    separate_forces[i].add_assign(force_ij);
-                    separate_forces[j].sub_assign(force_ij);
-                    near_nodes[i].add_assign(1);
-                    near_nodes[j].add_assign(1);
-                }
+
+            // We can assume no forces CAN happen outside of desired_separation range and
+            // forces MUST happen withing desired_separation range.
+            let close_nodes: Vec<&Node> = kdtree.within_radius(nodei, self.desired_separation);
+
+            let amount_of_close_nodes = close_nodes.len();
+
+            for close_node in close_nodes {
+                let force: Vector2<f64> = self.get_separation_force(nodei, close_node);
+                separate_forces[i].add_assign(force);
             }
 
-            if near_nodes[i] > 0 {
-                separate_forces[i].div_assign(near_nodes[i] as f64);
+            if amount_of_close_nodes > 0 {
+                separate_forces[i].div_assign(amount_of_close_nodes as f64);
             }
 
-            if separate_forces[i].magnitude() > 0.0 {
-                separate_forces[i].set_magnitude(self.max_speed);
-                separate_forces[i].sub_assign(self.nodes[i].velocity);
-                separate_forces[i] = separate_forces[i].cap_magnitude(self.max_force);
-            }
+            separate_forces[i].set_magnitude(self.max_speed);
+            separate_forces[i].sub_assign(self.nodes[i].velocity);
+            separate_forces[i] = separate_forces[i].cap_magnitude(self.max_force);
         }
 
         return separate_forces;
@@ -222,6 +225,7 @@ impl Line {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Node {
     position: Point2<f64>,
     velocity: Vector2<f64>,
@@ -269,5 +273,15 @@ impl fmt::Debug for Node {
             .field("vel", &self.velocity)
             .field("acc", &self.acceleration)
             .finish()
+    }
+}
+
+// Somehow the nalgebra feature of kd-tree doesn't work so doing it manually.
+// implement `KdPoint` for your item type.
+impl KdPoint for Node {
+    type Scalar = f64;
+    type Dim = typenum::U2; // 2 dimensional tree.
+    fn at(&self, k: usize) -> f64 {
+        self.position[k]
     }
 }
