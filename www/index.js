@@ -10,13 +10,13 @@ const gui = new dat.GUI({
 });
 
 let params = {
-  totalSteps: 2000,
+  maxSteps: 2000,
 
   debug: false,
   smoothPath: false,
 
   radius: 10,
-  amountOfStartingPoints: 10,
+  nStartingPoints: 10,
 
   maxForce: 1.5,
   maxSpeed: 1.0,
@@ -30,6 +30,8 @@ let amountOfTotalPoints = 0;
 
 let line;
 
+var startTime, endTime;
+
 // Only executed our code once the DOM is ready.
 window.onload = function () {
   paper.setup(document.getElementById("paper-canvas"));
@@ -40,17 +42,18 @@ window.onload = function () {
   path.closed = true;
 
   params.stop = function() {
-    currentStep = params.totalSteps + 1;
+    currentStep = params.maxSteps + 1;
     console.log(params.currentStep)
   }
 
   params.reset = function() {
+    start();
     path.selected = params.debug;
 
     line = new wasm.Line(
       paper.view.center.x,
       paper.view.center.y,
-      params.amountOfStartingPoints,
+      params.nStartingPoints,
       params.radius,
       params.maxForce,
       params.maxSpeed,
@@ -70,7 +73,7 @@ window.onload = function () {
   function animationLoop() {
     fps.render();
 
-    if (currentStep > params.totalSteps) {
+    if (currentStep > params.maxSteps) {
       return;
     }
 
@@ -105,7 +108,7 @@ window.onload = function () {
     gui.add(params, "stop").name("Stop");
 
     gui
-      .add(params, "totalSteps", 0, 10000)
+      .add(params, "maxSteps", 0, 10000)
       .listen()
       .onChange((_) => {
         params.reset();
@@ -133,7 +136,7 @@ window.onload = function () {
       });
 
     gui
-      .add(params, "amountOfStartingPoints", 0, 100)
+      .add(params, "nStartingPoints", 0, 100)
       .listen()
       .onChange((_) => {
         params.reset();
@@ -219,7 +222,23 @@ const fps = new (class {
 
 Amount of Steps = ${currentStep}
 Total amount of Points = ${amountOfTotalPoints}
+Time elapsed = ${end()}s
 
   `.trim();
   }
 })();
+
+function start() {
+  startTime = new Date();
+};
+
+function end() {
+  endTime = new Date();
+  var timeDiff = endTime - startTime; //in ms
+  // strip the ms
+  timeDiff /= 1000;
+
+  // get seconds 
+  var seconds = Math.round(timeDiff);
+  return seconds;
+}
