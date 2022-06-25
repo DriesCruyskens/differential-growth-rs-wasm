@@ -15,6 +15,7 @@ wasm-bindgen = "0.2.63"
 js-sys = "0.3.57"
 web-sys = { version = "0.3.57", features = ["console"] }
 nalgebra = "0.31.0"
+kiddo = "0.2.4"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -31,6 +32,11 @@ wee_alloc = { version = "0.4.5", optional = true }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
+criterion = "0.3"
+
+[[bench]]
+name = "my_benchmark"
+harness = false
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
