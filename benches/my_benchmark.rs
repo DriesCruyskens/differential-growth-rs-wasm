@@ -15,7 +15,7 @@ pub fn criterion_benchmark(c: &mut Criterion) {
                 black_box(0.9),
                 black_box(5.0),
             );
-            for _ in 0..50 {
+            for _ in 0..200 {
                 line.run();
             }
         })
