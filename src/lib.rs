@@ -27,7 +27,6 @@ pub struct Line {
     max_force: f64,
     max_speed: f64,
     desired_separation: f64,
-    desired_separation_sq: f64,
     separation_cohesion_ration: f64,
     max_edge_length: f64,
 }
@@ -57,7 +56,6 @@ impl Line {
             max_force,
             max_speed,
             desired_separation,
-            desired_separation_sq: desired_separation.powi(2),
             separation_cohesion_ration,
             max_edge_length: max_edge_len,
         }
@@ -158,18 +156,18 @@ impl Line {
             // forces MUST happen withing desired_separation range.
             let close_nodes: Vec<&Node> = kdtree.within_radius(nodei, self.desired_separation);
 
-            let amount_of_close_nodes = close_nodes.len();
+            let _amount_of_close_nodes = close_nodes.len();
 
             for close_node in close_nodes {
                 let force: Vector2<f64> = self.get_separation_force(nodei, close_node);
                 separate_forces[i].add_assign(force);
             }
 
-            if amount_of_close_nodes > 0 {
-                // This doesn't do much difference visually so I think this can be removed
-                // to optimise.
-                separate_forces[i].div_assign(amount_of_close_nodes as f64);
-            }
+            // This doesn't do much difference visually so I think this can be removed
+            // to minimise branching in a hot loop.
+            // if _amount_of_close_nodes > 0 {
+            //     separate_forces[i].div_assign(_amount_of_close_nodes as f64);
+            // }
 
             separate_forces[i].set_magnitude(self.max_speed);
             separate_forces[i].sub_assign(self.nodes[i].velocity);
@@ -194,7 +192,7 @@ impl Line {
         let distance_sq: f64 =
             (n2.position.x - n1.position.x).powi(2) + (n2.position.y - n1.position.y).powi(2);
 
-        if distance_sq > 0.0 && distance_sq < self.desired_separation_sq {
+        if distance_sq > 0.0 {
             let mut diff: Vector2<f64> = n1.position.sub(n2.position);
             diff = diff.normalize();
             diff.div_assign(distance_sq.sqrt());
@@ -208,21 +206,36 @@ impl Line {
         let n: usize = self.nodes.len();
         let mut cohesion_forces: Vec<Vector2<f64>> = Vec::with_capacity(n);
 
-        for i in 0..n {
+        // I'm doing the cohesion force calculation of the first and last
+        // node separately to prevent branching in a hot loop.
+
+        // cohesion force of i == 0 (first node)
+        {
             let mut sum: Vector2<f64> = Vector2::default();
-            if i != 0 && i != n - 1 {
-                sum.add_assign(self.nodes[i - 1].position.coords);
-                sum.add_assign(self.nodes[i + 1].position.coords);
-            } else if i == 0 {
-                sum.add_assign(self.nodes[n - 1].position.coords);
-                sum.add_assign(self.nodes[i + 1].position.coords);
-            } else if i == n - 1 {
-                sum.add_assign(self.nodes[i - 1].position.coords);
-                sum.add_assign(self.nodes[0].position.coords);
-            }
+            sum.add_assign(self.nodes[n - 1].position.coords);
+            sum.add_assign(self.nodes[0 + 1].position.coords);
+            sum.div_assign(2.0);
+            cohesion_forces.push(self.nodes[0].seek(&sum));
+        }
+
+        // cohesion force of everything in between
+        for i in 1..n - 1 {
+            let mut sum: Vector2<f64> = Vector2::default();
+            sum.add_assign(self.nodes[i - 1].position.coords);
+            sum.add_assign(self.nodes[i + 1].position.coords);
             sum.div_assign(2.0);
             cohesion_forces.push(self.nodes[i].seek(&sum));
         }
+
+        // cohesion force of i == n-1 (last node)
+        {
+            let mut sum: Vector2<f64> = Vector2::default();
+            sum.add_assign(self.nodes[n - 1 - 1].position.coords);
+            sum.add_assign(self.nodes[0].position.coords);
+            sum.div_assign(2.0);
+            cohesion_forces.push(self.nodes[0].seek(&sum));
+        }
+
         return cohesion_forces;
     }
 }
