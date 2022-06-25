@@ -166,6 +166,8 @@ impl Line {
             }
 
             if amount_of_close_nodes > 0 {
+                // This doesn't do much difference visually so I think this can be removed
+                // to optimise.
                 separate_forces[i].div_assign(amount_of_close_nodes as f64);
             }
 
