@@ -18,17 +18,15 @@ let params = {
   radius: 10,
   amountOfStartingPoints: 10,
 
-  maxForce: 1.1,
+  maxForce: 1.5,
   maxSpeed: 1.0,
   desiredSeparation: 9.0,
   separationCohesionRatio: 0.9,
   maxEdgeLength: 5.0,
-
-  // just for displaying, not an input variable
-  amountOfTotalPoints: 0
 };
 
 let currentStep = 0;
+let amountOfTotalPoints = 0;
 
 let line;
 
@@ -40,6 +38,11 @@ window.onload = function () {
   let path = new paper.Path();
   path.strokeColor = "black";
   path.closed = true;
+
+  params.stop = function() {
+    currentStep = params.totalSteps + 1;
+    console.log(params.currentStep)
+  }
 
   params.reset = function() {
     path.selected = params.debug;
@@ -90,13 +93,16 @@ window.onload = function () {
       segments.push(point);
     }
 
-    params.amountOfTotalPoints = segments.length;
+    amountOfTotalPoints = segments.length;
 
     return segments;
   }
 
+
   function initGui() {
     gui.add(params, "reset").name("Run");
+
+    gui.add(params, "stop").name("Stop");
 
     gui
       .add(params, "totalSteps", 0, 10000)
@@ -212,7 +218,7 @@ const fps = new (class {
   max of last 100 = ${Math.round(max)}
 
 Amount of Steps = ${currentStep}
-Total amount of Points = ${params.amountOfTotalPoints}
+Total amount of Points = ${amountOfTotalPoints}
 
   `.trim();
   }
