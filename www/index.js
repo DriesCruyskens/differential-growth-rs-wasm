@@ -10,19 +10,22 @@ const gui = new dat.GUI({
 });
 
 let params = {
-  totalSteps: 300,
+  totalSteps: 2000,
 
   debug: false,
   smoothPath: false,
 
   radius: 10,
-  amountOfPoints: 10,
+  amountOfStartingPoints: 10,
 
-  maxForce: 0.9,
+  maxForce: 1.1,
   maxSpeed: 1.0,
   desiredSeparation: 9.0,
-  separationCohesionRatio: 1.1,
+  separationCohesionRatio: 0.9,
   maxEdgeLength: 5.0,
+
+  // just for displaying, not an input variable
+  amountOfTotalPoints: 0
 };
 
 let currentStep = 0;
@@ -44,7 +47,7 @@ window.onload = function () {
     line = new wasm.Line(
       paper.view.center.x,
       paper.view.center.y,
-      params.amountOfPoints,
+      params.amountOfStartingPoints,
       params.radius,
       params.maxForce,
       params.maxSpeed,
@@ -87,6 +90,8 @@ window.onload = function () {
       segments.push(point);
     }
 
+    params.amountOfTotalPoints = segments.length;
+
     return segments;
   }
 
@@ -94,82 +99,72 @@ window.onload = function () {
     gui.add(params, "reset").name("Run");
 
     gui
-      .add(params, "totalSteps", 0, 1000)
+      .add(params, "totalSteps", 0, 10000)
       .listen()
-      .onChange((value) => {
-        params.totalSteps = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "debug")
       .listen()
-      .onChange((value) => {
-        params.debug = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "smoothPath")
       .listen()
-      .onChange((value) => {
-        params.smoothPath = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "radius", 0, 300)
       .listen()
-      .onChange((value) => {
-        params.radius = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
-      .add(params, "amountOfPoints", 0, 100)
+      .add(params, "amountOfStartingPoints", 0, 100)
       .listen()
-      .onChange((value) => {
-        params.amountOfPoints = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "maxForce", 0, 2)
       .listen()
-      .onChange((value) => {
-        params.maxForce = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "maxSpeed", 0, 2)
       .listen()
-      .onChange((value) => {
-        params.maxSpeed = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "desiredSeparation", 0, 50)
       .listen()
-      .onChange((value) => {
-        params.desiredSeparation = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "separationCohesionRatio", 0, 2)
       .listen()
-      .onChange((value) => {
-        params.separationCohesionRatio = value;
+      .onChange((_) => {
         params.reset();
       });
 
     gui
       .add(params, "maxEdgeLength", 0, 30)
       .listen()
-      .onChange((value) => {
-        params.maxEdgeLength = value;
+      .onChange((_) => {
         params.reset();
       });
   }
@@ -217,6 +212,8 @@ const fps = new (class {
   max of last 100 = ${Math.round(max)}
 
 Amount of Steps = ${currentStep}
+Total amount of Points = ${params.amountOfTotalPoints}
+
   `.trim();
   }
 })();
