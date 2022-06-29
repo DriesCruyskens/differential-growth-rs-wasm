@@ -22,7 +22,7 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
-pub struct Line {
+pub struct DifferentialGrowth {
     nodes: Vec<Node>,
     max_force: f64,
     max_speed: f64,
@@ -32,7 +32,7 @@ pub struct Line {
 }
 
 #[wasm_bindgen]
-impl Line {
+impl DifferentialGrowth {
     #[wasm_bindgen(constructor)]
     pub fn new(
         origin_x: f64,
@@ -44,14 +44,14 @@ impl Line {
         desired_separation: f64,
         separation_cohesion_ration: f64,
         max_edge_len: f64,
-    ) -> Line {
+    ) -> DifferentialGrowth {
         // Generate points on a circle and map to Nodes.
         let nodes: Vec<Node> =
             generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
                 .into_iter()
                 .map(|point: Point2<f64>| Node::new(point, max_speed, max_force))
                 .collect();
-        Line {
+        DifferentialGrowth {
             nodes,
             max_force,
             max_speed,
@@ -83,7 +83,7 @@ impl Line {
 
 // Having two different `impl Line` sections because wasm_bindgen attribute macro
 // is not supporting Vectors from nalgebra
-impl Line {
+impl DifferentialGrowth {
     pub fn add_node_at(&mut self, node: Node, index: usize) {
         self.nodes.insert(index, node);
     }

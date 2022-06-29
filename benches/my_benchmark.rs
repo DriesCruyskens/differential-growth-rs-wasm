@@ -4,7 +4,7 @@ use differential_growth;
 pub fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("Run Differential Line", |b| {
         b.iter(|| {
-            let mut line = differential_growth::Line::new(
+            let mut line = differential_growth::DifferentialGrowth::new(
                 black_box(100.0),
                 black_box(100.0),
                 black_box(10),
