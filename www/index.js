@@ -2,6 +2,7 @@ import * as wasm from "differential-growth";
 import * as dat from "dat.gui";
 import * as paper from "paper";
 import { saveAs } from "file-saver";
+import * as hash from 'object-hash';
 
 // Only executed our code once the DOM is ready.
 window.onload = function () {
@@ -18,6 +19,8 @@ class DifferentialGrowth {
 
       strokeWidth: 1,
 
+      statistics: true,
+
       debug: false,
       smoothPath: false,
 
@@ -32,7 +35,7 @@ class DifferentialGrowth {
     };
 
     this.canvas = document.getElementById("canvas");
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext("2d");
 
     paper.setup(canvas);
 
@@ -68,11 +71,15 @@ class DifferentialGrowth {
 
   reset() {
     this.startTimer();
+
     this.path.selected = this.params.debug;
+    this.path.strokeWidth = this.params.strokeWidth;
+
+    this.ctx.lineWidth = this.params.strokeWidth;
 
     this.differentialGrowth = new wasm.DifferentialGrowth(
       this.canvas.width / 2,
-      this.canvas.height/ 2,
+      this.canvas.height / 2,
       this.params.nStartingPoints,
       this.params.radius,
       this.params.maxForce,
@@ -106,15 +113,15 @@ class DifferentialGrowth {
 
   renderWithCanvasApi() {
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     this.ctx.beginPath();
-    this.strokeStyle = 'black';
+    this.strokeStyle = "black";
     this.ctx.moveTo(this.pointsArray[0], this.pointsArray[1]);
 
     for (let i = 2; i < this.pointsArray.length; i = i + 2) {
-      this.ctx.lineTo(this.pointsArray[i], this.pointsArray[i+1]);
+      this.ctx.lineTo(this.pointsArray[i], this.pointsArray[i + 1]);
     }
-  
+
     this.ctx.closePath();
     this.ctx.stroke();
   }
@@ -135,7 +142,9 @@ class DifferentialGrowth {
       this.renderWithPaperjs();
     }
 
-    this.renderStatistics();
+    if (this.params.statistics) {
+      this.renderStatistics();
+    }
 
     this.amountOfTotalPoints = this.pointsArray.length / 2;
 
@@ -157,85 +166,115 @@ class DifferentialGrowth {
       .listen()
       .onChange((_) => {
         this.reset();
-    });
+      });
 
-    this.gui
-      .add(this.params, "renderer", ['canvas-api', 'paper-js'])
+    const esthetics = this.gui.addFolder("Esthetics");
+
+    esthetics
+      .add(this.params, "renderer", ["canvas-api", "paper-js"])
       .listen()
       .onChange((_) => {
         this.reset();
-    });
+      });
 
-    this.gui
+    esthetics
+      .add(this.params, "strokeWidth", 1, 10)
+      .step(1)
+      .listen()
+      .onChange((_) => {
+        this.reset();
+      });
+
+    esthetics
       .add(this.params, "debug")
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    esthetics
       .add(this.params, "smoothPath")
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    const inputVariables = this.gui.addFolder("Parameters");
+
+    inputVariables
       .add(this.params, "radius", 0, 300)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    inputVariables
       .add(this.params, "nStartingPoints", 0, 100)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    inputVariables
       .add(this.params, "maxForce", 0, 2)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    inputVariables
       .add(this.params, "maxSpeed", 0, 2)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    inputVariables
       .add(this.params, "desiredSeparation", 0, 50)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    inputVariables
       .add(this.params, "separationCohesionRatio", 0, 2)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui
+    inputVariables
       .add(this.params, "maxEdgeLength", 0, 30)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    this.gui.add(this, "exportSVG").name("Export SVG");
+    const utilities = this.gui.addFolder("Utilities");
+
+    utilities
+      .add(this.params, "statistics")
+      .listen()
+      .onChange((_) => {
+        this.reset();
+        document.getElementById("statistics").innerHTML = "";
+      });
+
+    utilities.add(this, "exportParameters").name("Export parameters");
+
+    utilities.add(this, "exportSVG").name("Export SVG");
+  }
+
+  exportParameters() {
+    const blob = new Blob([JSON.stringify(this.params)], { type: 'application/json' });
+    saveAs(blob, "differential_line_growth_params_" + hash(this.params) + '_' + new Date(Date.now()).toDateString()  + ".json");
   }
 
   exportSVG() {
-    var svg = paper.project.exportSVG({ asString: true });
-    var blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    saveAs(blob, "differential_line_growth_" + JSON.stringify(this) + ".svg");
+    this.renderWithPaperjs();
+    const svg = paper.project.exportSVG({ asString: true });
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    saveAs(blob, "differential_line_growth_" + hash(this.params) + '_' + new Date(Date.now()).toDateString() + ".svg");
   }
 
   // https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html
