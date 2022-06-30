@@ -161,12 +161,6 @@ class DifferentialGrowth {
 
     this.gui.add(this, "stop").name("Stop");
 
-    this.gui
-      .add(this.params, "maxSteps", 0, 10000)
-      .listen()
-      .onChange((_) => {
-        this.reset();
-      });
 
     const esthetics = this.gui.addFolder("Esthetics");
 
@@ -199,51 +193,58 @@ class DifferentialGrowth {
         this.reset();
       });
 
-    const inputVariables = this.gui.addFolder("Parameters");
+    const Control = this.gui.addFolder("Control");
 
-    inputVariables
+    Control
+      .add(this.params, "maxSteps", 0, 10000)
+      .listen()
+      .onChange((_) => {
+        this.reset();
+      });
+
+    Control
       .add(this.params, "radius", 0, 300)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    inputVariables
+    Control
       .add(this.params, "nStartingPoints", 0, 100)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    inputVariables
+    Control
       .add(this.params, "maxForce", 0, 2)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    inputVariables
+    Control
       .add(this.params, "maxSpeed", 0, 2)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    inputVariables
+    Control
       .add(this.params, "desiredSeparation", 0, 50)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    inputVariables
+    Control
       .add(this.params, "separationCohesionRatio", 0, 2)
       .listen()
       .onChange((_) => {
         this.reset();
       });
 
-    inputVariables
+    Control
       .add(this.params, "maxEdgeLength", 0, 30)
       .listen()
       .onChange((_) => {
