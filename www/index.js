@@ -14,6 +14,10 @@ class DifferentialGrowth {
     this.params = {
       maxSteps: 2000,
 
+      renderer: "canvas-api", // 'paper-js'
+
+      strokeWidth: 1,
+
       debug: false,
       smoothPath: false,
 
@@ -27,7 +31,10 @@ class DifferentialGrowth {
       maxEdgeLength: 5.0,
     };
 
-    paper.setup(document.getElementById("canvas"));
+    this.canvas = document.getElementById("canvas");
+    this.ctx = canvas.getContext('2d');
+
+    paper.setup(canvas);
 
     // initialise path
     this.path = new paper.Path();
@@ -41,7 +48,7 @@ class DifferentialGrowth {
     this.bindedAnimationLoop = this.animationLoop.bind(this);
 
     this.gui = new dat.GUI({
-      name: "Differential Line",
+      name: "Differential Growth",
       autoPlace: true,
       closeOnTop: false,
     });
@@ -64,8 +71,8 @@ class DifferentialGrowth {
     this.path.selected = this.params.debug;
 
     this.differentialGrowth = new wasm.DifferentialGrowth(
-      paper.view.center.x,
-      paper.view.center.y,
+      this.canvas.width / 2,
+      this.canvas.height/ 2,
       this.params.nStartingPoints,
       this.params.radius,
       this.params.maxForce,
@@ -75,36 +82,62 @@ class DifferentialGrowth {
       this.params.maxEdgeLength
     );
 
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.currentStep = 0;
     this.amountOfTotalPoints = 0;
   }
 
-  getSegments(arr) {
+  renderWithPaperjs() {
+    this.path.removeSegments();
+
     let segments = [];
 
-    for (let i = 0; i < arr.length; i = i + 2) {
-      let point = new paper.Point(arr[i], arr[i + 1]);
+    for (let i = 0; i < this.pointsArray.length; i = i + 2) {
+      let point = new paper.Point(this.pointsArray[i], this.pointsArray[i + 1]);
       segments.push(point);
     }
 
-    this.amountOfTotalPoints = segments.length;
-
-    return segments;
-  }
-
-  animationLoop() {
-    this.renderStatistics();
-
-    if (this.currentStep > this.params.maxSteps) {
-      return;
-    }
-
-    this.path.removeSegments();
-    this.path.addSegments(this.getSegments(this.differentialGrowth.run()));
+    this.path.addSegments(segments);
 
     if (this.smoothPath) {
       this.path.smooth();
     }
+  }
+
+  renderWithCanvasApi() {
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    this.ctx.beginPath();
+    this.strokeStyle = 'black';
+    this.ctx.moveTo(this.pointsArray[0], this.pointsArray[1]);
+
+    for (let i = 2; i < this.pointsArray.length; i = i + 2) {
+      this.ctx.lineTo(this.pointsArray[i], this.pointsArray[i+1]);
+    }
+  
+    this.ctx.closePath();
+    this.ctx.stroke();
+  }
+
+  animationLoop() {
+    if (this.currentStep > this.params.maxSteps) {
+      return;
+    }
+
+    // The run() function returns the array of points as a 1d
+    // array of f64's. To get a coordinates for a specific index:
+    // x = arr[i*2]; y = arr[i*2 + 1]
+    this.pointsArray = this.differentialGrowth.run();
+
+    if (this.params.renderer == "canvas-api") {
+      this.renderWithCanvasApi();
+    } else if (this.params.renderer == "paper-js") {
+      this.renderWithPaperjs();
+    }
+
+    this.renderStatistics();
+
+    this.amountOfTotalPoints = this.pointsArray.length / 2;
 
     this.currentStep = this.currentStep + 1;
     requestAnimationFrame(this.bindedAnimationLoop);
@@ -124,7 +157,14 @@ class DifferentialGrowth {
       .listen()
       .onChange((_) => {
         this.reset();
-      });
+    });
+
+    this.gui
+      .add(this.params, "renderer", ['canvas-api', 'paper-js'])
+      .listen()
+      .onChange((_) => {
+        this.reset();
+    });
 
     this.gui
       .add(this.params, "debug")
