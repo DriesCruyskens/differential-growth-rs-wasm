@@ -61,7 +61,7 @@ impl DifferentialGrowth {
         }
     }
 
-    pub fn run(&mut self) -> Box<[f64]> {
+    pub fn tick(&mut self) -> Box<[f64]> {
         self.differentiate();
         self.growth();
         self.export_as_slice()

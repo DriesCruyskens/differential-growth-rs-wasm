@@ -134,7 +134,7 @@ class DifferentialGrowth {
     // The run() function returns the array of points as a 1d
     // array of f64's. To get a coordinates for a specific index:
     // x = arr[i*2]; y = arr[i*2 + 1]
-    this.pointsArray = this.differentialGrowth.run();
+    this.pointsArray = this.differentialGrowth.tick();
 
     if (this.params.renderer == "canvas-api") {
       this.renderWithCanvasApi();
