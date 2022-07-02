@@ -193,58 +193,58 @@ class DifferentialGrowth {
         this.run();
       });
 
-    const Control = this.gui.addFolder("Control");
+    const control = this.gui.addFolder("Control");
 
-    Control
+    control
       .add(this.params, "maxSteps", 0, 10000)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "radius", 0, 300)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "nStartingPoints", 0, 100)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "maxForce", 0, 2)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "maxSpeed", 0, 2)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "desiredSeparation", 0, 50)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "separationCohesionRatio", 0, 2)
       .listen()
       .onChange((_) => {
         this.run();
       });
 
-    Control
+    control
       .add(this.params, "maxEdgeLength", 0, 30)
       .listen()
       .onChange((_) => {
