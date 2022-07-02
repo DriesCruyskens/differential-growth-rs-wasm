@@ -1,4 +1,29 @@
-## Differential Line with Rust WASM
+## Differential Line Growth with Rust WASM
+
+This project uses wasm-pack and took the official wasm-pack game of life tutorial as a starting point.
+
+### Features
+
+js: 
+- Datgui
+  
+Rust: 
+- nalgebra for its point and vector
+- Benchmarks using criterionrs
+
+optimisations:
+
+- kd-tree for getting neighbor nodes when calculating rejection forces
+- removed branching out of hot loops
+- Letting Javascript access wasm's linear memory for the point's coordinates actually decreases perfomance. That is why I pass a boxed slice.
+
+### Developing
+
+Compile rust (execute manually after file changes):
+`wasm-pack build`
+
+Start dev server (auto re-compiles on file changes):
+`cd www && npm start`
 
 ### References
  
@@ -10,78 +35,11 @@
 - <https://inconvergent.net/generative/differential-line/>
 - <http://www.dgp.toronto.edu/~karan/artexhibit/mazes.pdf>
 - <https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html>
+- <https://stackoverflow.com/questions/50721411/how-to-see-rust-source-code-when-debugging-webassembly-in-a-browser>
 
 ### TODOS
-maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/
-Yew is not suited because I want to use DatGui anyway
+- starting shapes dropdown
+- different growing algorithms + datgui dropdown
+- maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/. Yew is not suited because I want to use DatGui anyway
+- move as much as possible to rust: canvas calls, request animation frame
 
-
-<div align="center">
-
-  <h1><code>wasm-pack-template</code></h1>
-
-  <strong>A template for kick starting a Rust and WebAssembly project using <a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>.</strong>
-
-  <p>
-    <a href="https://travis-ci.org/rustwasm/wasm-pack-template"><img src="https://img.shields.io/travis/rustwasm/wasm-pack-template.svg?style=flat-square" alt="Build Status" /></a>
-  </p>
-
-  <h3>
-    <a href="https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html">Tutorial</a>
-    <span> | </span>
-    <a href="https://discordapp.com/channels/442252698964721669/443151097398296587">Chat</a>
-  </h3>
-
-  <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
-</div>
-
-## About
-
-[**📚 Read this template tutorial! 📚**][template-docs]
-
-This template is designed for compiling Rust libraries into WebAssembly and
-publishing the resulting package to NPM.
-
-Be sure to check out [other `wasm-pack` tutorials online][tutorials] for other
-templates and usages of `wasm-pack`.
-
-[tutorials]: https://rustwasm.github.io/docs/wasm-pack/tutorials/index.html
-[template-docs]: https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html
-
-## 🚴 Usage
-
-### 🐑 Use `cargo generate` to Clone this Template
-
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
-
-```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
-```
-
-### 🛠️ Build with `wasm-pack build`
-
-```
-wasm-pack build
-```
-
-### 🔬 Test in Headless Browsers with `wasm-pack test`
-
-```
-wasm-pack test --headless --firefox
-```
-
-### 🎁 Publish to NPM with `wasm-pack publish`
-
-```
-wasm-pack publish
-```
-
-## 🔋 Batteries Included
-
-* [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) for communicating
-  between WebAssembly and JavaScript.
-* [`console_error_panic_hook`](https://github.com/rustwasm/console_error_panic_hook)
-  for logging panic messages to the developer console.
-* [`wee_alloc`](https://github.com/rustwasm/wee_alloc), an allocator optimized
-  for small code size.
