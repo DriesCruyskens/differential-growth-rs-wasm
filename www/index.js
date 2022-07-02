@@ -168,7 +168,7 @@ class DifferentialGrowth {
       .add(this.params, "renderer", ["canvas-api", "paper-js"])
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     esthetics
@@ -176,21 +176,21 @@ class DifferentialGrowth {
       .step(1)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     esthetics
       .add(this.params, "debug")
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     esthetics
       .add(this.params, "smoothPath")
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     const Control = this.gui.addFolder("Control");
@@ -199,56 +199,56 @@ class DifferentialGrowth {
       .add(this.params, "maxSteps", 0, 10000)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "radius", 0, 300)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "nStartingPoints", 0, 100)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "maxForce", 0, 2)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "maxSpeed", 0, 2)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "desiredSeparation", 0, 50)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "separationCohesionRatio", 0, 2)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     Control
       .add(this.params, "maxEdgeLength", 0, 30)
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
       });
 
     const utilities = this.gui.addFolder("Utilities");
@@ -257,7 +257,7 @@ class DifferentialGrowth {
       .add(this.params, "statistics")
       .listen()
       .onChange((_) => {
-        this.reset();
+        this.run();
         document.getElementById("statistics").innerHTML = "";
       });
 
