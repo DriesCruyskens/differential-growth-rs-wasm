@@ -6,6 +6,9 @@ This project uses wasm-pack and took the official wasm-pack game of life tutoria
 
 js: 
 - Datgui
+- Export SVG/ parameters
+- Statistics
+- 2 different renderers: paperjs (smoother animation) and canvas-api (faster)
   
 Rust: 
 - nalgebra for its point and vector
