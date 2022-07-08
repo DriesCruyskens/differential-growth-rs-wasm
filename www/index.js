@@ -15,7 +15,7 @@ class DifferentialGrowth {
     this.params = {
       maxSteps: 2000,
 
-      renderer: "canvas-api", // 'paper-js'
+      renderer: "paper-js", // 'paper-js'
 
       strokeWidth: 1,
 
@@ -78,8 +78,8 @@ class DifferentialGrowth {
     this.ctx.lineWidth = this.params.strokeWidth;
 
     this.differentialGrowth = new wasm.DifferentialGrowth(
-      this.canvas.width / 2,
-      this.canvas.height / 2,
+      paper.view.center.x,
+      paper.view.center.y,
       this.params.nStartingPoints,
       this.params.radius,
       this.params.maxForce,
