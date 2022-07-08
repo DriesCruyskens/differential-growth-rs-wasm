@@ -42,7 +42,8 @@ Start dev server (auto re-compiles on file changes):
 
 ### TODOS
 - starting shapes dropdown
+- draw line using mouse?
 - different growing algorithms + datgui dropdown
-- maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/. Yew is not suited because I want to use DatGui anyway
+- maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/. Yew is not suited because I want to use DatGui anyway. Trunk not suited -> also no support for npm packages like dat.gui
 - move as much as possible to rust: canvas calls, request animation frame
 
