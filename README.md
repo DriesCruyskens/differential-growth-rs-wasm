@@ -32,7 +32,7 @@ failed optimisations:
 Compile rust (execute manually after file changes):
 `wasm-pack build`
 
-Start dev server (auto re-compiles on file changes):
+Start Vite dev server (auto re-compiles on file changes):
 `cd www && npm start`
 
 ### References
@@ -47,12 +47,11 @@ Start dev server (auto re-compiles on file changes):
 - <https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html>
 - <https://stackoverflow.com/questions/50721411/how-to-see-rust-source-code-when-debugging-webassembly-in-a-browser>
 - <https://web.dev/canvas-hidipi/>
+- <https://rustwasm.github.io/wasm-bindgen/examples/without-a-bundler.html>
 
 ### TODOS
 - starting shapes dropdown
 - draw line using mouse?
 - different growing algorithms + datgui dropdown
   
-- maybe switch from wasm-pack to Trunk https://trunkrs.dev/assets/. Yew is not suited because I want to use DatGui anyway. Trunk not suited -> also no support for npm packages like dat.gui
-- switch webpack for vite
-
+- publish to npm

@@ -1,11 +1,13 @@
-import * as wasm from "differential-growth";
+// import * as wasm from "differential-growth";
+import init, { RustDifferentialGrowth } from "rust-differential-growth";
 import * as dat from "dat.gui";
 import * as paper from "paper";
 import { saveAs } from "file-saver";
-import hash from 'object-hash';
+import hash from "object-hash";
 
 // Only executed our code once the DOM is ready.
-window.onload = function () {
+window.onload = async function () {
+  await init();
   const d = new DifferentialGrowth();
   d.run();
 };
@@ -64,7 +66,7 @@ class DifferentialGrowth {
 
     this.ctx.lineWidth = this.params.strokeWidth;
 
-    this.differentialGrowth = new wasm.DifferentialGrowth(
+    this.differentialGrowth = new RustDifferentialGrowth(
       paper.view.center.x,
       paper.view.center.y,
       this.params.nStartingPoints,
@@ -106,7 +108,6 @@ class DifferentialGrowth {
     this.gui.add(this, "run").name("Run");
 
     this.gui.add(this, "stop").name("Stop");
-
 
     const esthetics = this.gui.addFolder("Esthetics");
 
@@ -192,8 +193,17 @@ class DifferentialGrowth {
   }
 
   exportParameters() {
-    const blob = new Blob([JSON.stringify(this.params)], { type: 'application/json' });
-    saveAs(blob, "differential_line_growth_params_" + hash(this.params) + '_' + new Date(Date.now()).toDateString()  + ".json");
+    const blob = new Blob([JSON.stringify(this.params)], {
+      type: "application/json",
+    });
+    saveAs(
+      blob,
+      "differential_line_growth_params_" +
+        hash(this.params) +
+        "_" +
+        new Date(Date.now()).toDateString() +
+        ".json"
+    );
   }
 
   exportSVG() {

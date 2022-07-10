@@ -1,5 +1,5 @@
 [package]
-name = "differential-growth"
+name = "rust-differential-growth"
 version = "0.1.0"
 authors = ["Dries Cruyskens <dries.cruyskens@gmail.com>"]
 edition = "2018"

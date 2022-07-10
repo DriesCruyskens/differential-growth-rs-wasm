@@ -23,7 +23,7 @@ pub fn main() {
 }
 
 #[wasm_bindgen]
-pub struct DifferentialGrowth {
+pub struct RustDifferentialGrowth {
     canvas_width: f64,
     canvas_height: f64,
     nodes: Vec<Node>,
@@ -35,7 +35,7 @@ pub struct DifferentialGrowth {
 }
 
 #[wasm_bindgen]
-impl DifferentialGrowth {
+impl RustDifferentialGrowth {
     #[wasm_bindgen(constructor)]
     pub fn new(
         origin_x: f64,
@@ -49,14 +49,14 @@ impl DifferentialGrowth {
         max_edge_len: f64,
         canvas_width: f64,
         canvas_height: f64,
-    ) -> DifferentialGrowth {
+    ) -> RustDifferentialGrowth {
         // Generate points on a circle and map to Nodes.
         let nodes: Vec<Node> =
             generate_points_of_circle(origin_x, origin_y, amount_of_points, radius)
                 .into_iter()
                 .map(|point: Point2<f64>| Node::new(point, max_speed, max_force))
                 .collect();
-        DifferentialGrowth {
+        RustDifferentialGrowth {
             nodes,
             max_force,
             max_speed,
@@ -110,7 +110,7 @@ impl DifferentialGrowth {
 
 // Having two different `impl Line` sections because wasm_bindgen attribute macro
 // is not supporting Vectors from nalgebra
-impl DifferentialGrowth {
+impl RustDifferentialGrowth {
     pub fn add_node_at(&mut self, node: Node, index: usize) {
         self.nodes.insert(index, node);
     }
