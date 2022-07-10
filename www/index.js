@@ -15,7 +15,7 @@ class DifferentialGrowth {
     this.params = {
       maxSteps: 2000,
 
-      renderer: "paper-js", // 'paper-js'
+      renderer: "paper-js", // 'paper-js', 'canvas-api'
 
       strokeWidth: 1,
 

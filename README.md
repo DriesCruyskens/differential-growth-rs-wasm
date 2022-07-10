@@ -39,6 +39,7 @@ Start dev server (auto re-compiles on file changes):
 - <http://www.dgp.toronto.edu/~karan/artexhibit/mazes.pdf>
 - <https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html>
 - <https://stackoverflow.com/questions/50721411/how-to-see-rust-source-code-when-debugging-webassembly-in-a-browser>
+- <https://web.dev/canvas-hidipi/>
 
 ### TODOS
 - starting shapes dropdown
