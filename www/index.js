@@ -66,7 +66,7 @@ class DifferentialGrowth {
 
     this.ctx.lineWidth = this.params.strokeWidth;
 
-    this.differentialGrowth = new RustDifferentialGrowth(
+    this.rustDifferentialGrowth = new RustDifferentialGrowth(
       paper.view.center.x,
       paper.view.center.y,
       this.params.nStartingPoints,
@@ -90,7 +90,8 @@ class DifferentialGrowth {
     }
 
     // The tick() function returns the amount of points. Used for statistics.
-    this.amountOfTotalPoints = this.differentialGrowth.tick(this.ctx);
+    this.amountOfTotalPoints = this.rustDifferentialGrowth.tick();
+    this.rustDifferentialGrowth.render(this.ctx);
 
     if (this.params.statistics) {
       this.renderStatistics();
@@ -213,7 +214,7 @@ class DifferentialGrowth {
 
     const segments = [];
 
-    const pointsArray = this.differentialGrowth.export_as_slice();
+    const pointsArray = this.rustDifferentialGrowth.export_as_slice();
 
     for (let i = 0; i < pointsArray.length; i = i + 2) {
       let point = new paper.Point(pointsArray[i], pointsArray[i + 1]);

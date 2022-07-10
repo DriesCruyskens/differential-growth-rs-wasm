@@ -69,16 +69,14 @@ impl RustDifferentialGrowth {
     }
 
     /// Returns the amount of points.
-    pub fn tick(&mut self, ctx: &CanvasRenderingContext2d) -> usize {
+    pub fn tick(&mut self) -> usize {
         self.differentiate();
         self.growth();
-
-        self.render(ctx);
 
         self.nodes.len()
     }
 
-    fn render(&self, ctx: &CanvasRenderingContext2d) {
+    pub fn render(&self, ctx: &CanvasRenderingContext2d) {
         ctx.clear_rect(0.0, 0.0, self.canvas_width, self.canvas_height);
         ctx.begin_path();
         ctx.move_to(
