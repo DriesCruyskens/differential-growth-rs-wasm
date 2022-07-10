@@ -87,9 +87,7 @@ class DifferentialGrowth {
       return;
     }
 
-    // The run() function returns the array of points as a 1d
-    // array of f64's. To get a coordinates for a specific index:
-    // x = arr[i*2]; y = arr[i*2 + 1]
+    // The tick() function returns the amount of points. Used for statistics.
     this.amountOfTotalPoints = this.differentialGrowth.tick(this.ctx);
 
     if (this.params.statistics) {
