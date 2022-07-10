@@ -9,6 +9,7 @@ use kd_tree::{KdPoint, KdTree2};
 use nalgebra::{distance, Point2, Vector2};
 use utils::{generate_points_of_circle, set_panic_hook};
 use wasm_bindgen::prelude::*;
+use web_sys::CanvasRenderingContext2d;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -23,6 +24,8 @@ pub fn main() {
 
 #[wasm_bindgen]
 pub struct DifferentialGrowth {
+    canvas_width: f64,
+    canvas_height: f64,
     nodes: Vec<Node>,
     max_force: f64,
     max_speed: f64,
@@ -44,6 +47,8 @@ impl DifferentialGrowth {
         desired_separation: f64,
         separation_cohesion_ration: f64,
         max_edge_len: f64,
+        canvas_width: f64,
+        canvas_height: f64,
     ) -> DifferentialGrowth {
         // Generate points on a circle and map to Nodes.
         let nodes: Vec<Node> =
@@ -58,13 +63,35 @@ impl DifferentialGrowth {
             desired_separation,
             separation_cohesion_ration,
             max_edge_length: max_edge_len,
+            canvas_width,
+            canvas_height,
         }
     }
 
-    pub fn tick(&mut self) -> Box<[f64]> {
+    /// Returns the amount of points.
+    pub fn tick(&mut self, ctx: &CanvasRenderingContext2d) -> usize {
         self.differentiate();
         self.growth();
-        self.export_as_slice()
+
+        self.render(ctx);
+
+        self.nodes.len()
+    }
+
+    fn render(&self, ctx: &CanvasRenderingContext2d) {
+        ctx.clear_rect(0.0, 0.0, self.canvas_width, self.canvas_height);
+        ctx.begin_path();
+        ctx.move_to(
+            self.nodes.first().expect("no points").position.x,
+            self.nodes.first().expect("no points").position.y,
+        );
+
+        for node in self.nodes.iter().skip(1) {
+            ctx.line_to(node.position.x, node.position.y);
+        }
+
+        ctx.close_path();
+        ctx.stroke();
     }
 
     // https://rustwasm.github.io/docs/wasm-bindgen/reference/types/boxed-number-slices.html

@@ -15,14 +15,9 @@ class DifferentialGrowth {
     this.params = {
       maxSteps: 2000,
 
-      renderer: "paper-js", // 'paper-js', 'canvas-api'
-
       strokeWidth: 1,
 
       statistics: true,
-
-      debug: false,
-      smoothPath: false,
 
       radius: 10,
       nStartingPoints: 10,
@@ -37,13 +32,8 @@ class DifferentialGrowth {
     this.canvas = document.getElementById("canvas");
     this.ctx = canvas.getContext("2d");
 
-    paper.setup(canvas);
-
-    // initialise path
-    this.path = new paper.Path();
-    this.path.strokeColor = "black";
-    this.path.closed = true;
-    this.path.selected = this.params.debug;
+    // This takes care of HiDPI screens for us.
+    paper.setup(this.canvas);
 
     // Providing 'this' to the animationLoop() function because it is
     // otherwise not available.
@@ -72,9 +62,6 @@ class DifferentialGrowth {
   reset() {
     this.startTimer();
 
-    this.path.selected = this.params.debug;
-    this.path.strokeWidth = this.params.strokeWidth;
-
     this.ctx.lineWidth = this.params.strokeWidth;
 
     this.differentialGrowth = new wasm.DifferentialGrowth(
@@ -86,44 +73,13 @@ class DifferentialGrowth {
       this.params.maxSpeed,
       this.params.desiredSeparation,
       this.params.separationCohesionRatio,
-      this.params.maxEdgeLength
+      this.params.maxEdgeLength,
+      this.canvas.width,
+      this.canvas.height
     );
 
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.currentStep = 0;
     this.amountOfTotalPoints = 0;
-  }
-
-  renderWithPaperjs() {
-    this.path.removeSegments();
-
-    let segments = [];
-
-    for (let i = 0; i < this.pointsArray.length; i = i + 2) {
-      let point = new paper.Point(this.pointsArray[i], this.pointsArray[i + 1]);
-      segments.push(point);
-    }
-
-    this.path.addSegments(segments);
-
-    if (this.smoothPath) {
-      this.path.smooth();
-    }
-  }
-
-  renderWithCanvasApi() {
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    this.ctx.beginPath();
-    this.strokeStyle = "black";
-    this.ctx.moveTo(this.pointsArray[0], this.pointsArray[1]);
-
-    for (let i = 2; i < this.pointsArray.length; i = i + 2) {
-      this.ctx.lineTo(this.pointsArray[i], this.pointsArray[i + 1]);
-    }
-
-    this.ctx.closePath();
-    this.ctx.stroke();
   }
 
   animationLoop() {
@@ -134,19 +90,11 @@ class DifferentialGrowth {
     // The run() function returns the array of points as a 1d
     // array of f64's. To get a coordinates for a specific index:
     // x = arr[i*2]; y = arr[i*2 + 1]
-    this.pointsArray = this.differentialGrowth.tick();
-
-    if (this.params.renderer == "canvas-api") {
-      this.renderWithCanvasApi();
-    } else if (this.params.renderer == "paper-js") {
-      this.renderWithPaperjs();
-    }
+    this.amountOfTotalPoints = this.differentialGrowth.tick(this.ctx);
 
     if (this.params.statistics) {
       this.renderStatistics();
     }
-
-    this.amountOfTotalPoints = this.pointsArray.length / 2;
 
     this.currentStep = this.currentStep + 1;
     requestAnimationFrame(this.bindedAnimationLoop);
@@ -165,29 +113,8 @@ class DifferentialGrowth {
     const esthetics = this.gui.addFolder("Esthetics");
 
     esthetics
-      .add(this.params, "renderer", ["canvas-api", "paper-js"])
-      .listen()
-      .onChange((_) => {
-        this.run();
-      });
-
-    esthetics
       .add(this.params, "strokeWidth", 1, 10)
       .step(1)
-      .listen()
-      .onChange((_) => {
-        this.run();
-      });
-
-    esthetics
-      .add(this.params, "debug")
-      .listen()
-      .onChange((_) => {
-        this.run();
-      });
-
-    esthetics
-      .add(this.params, "smoothPath")
       .listen()
       .onChange((_) => {
         this.run();
@@ -272,10 +199,32 @@ class DifferentialGrowth {
   }
 
   exportSVG() {
-    this.renderWithPaperjs();
+    const path = new paper.Path();
+    path.strokeColor = "black";
+    path.closed = true;
+
+    const segments = [];
+
+    const pointsArray = this.differentialGrowth.export_as_slice();
+
+    for (let i = 0; i < pointsArray.length; i = i + 2) {
+      let point = new paper.Point(pointsArray[i], pointsArray[i + 1]);
+      segments.push(point);
+    }
+
+    path.addSegments(segments);
+    path.smooth();
+
     const svg = paper.project.exportSVG({ asString: true });
     const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    saveAs(blob, "differential_line_growth_" + hash(this.params) + '_' + new Date(Date.now()).toDateString() + ".svg");
+    saveAs(
+      blob,
+      "differential_line_growth_" +
+        hash(this.params) +
+        "_" +
+        new Date(Date.now()).toDateString() +
+        ".svg"
+    );
   }
 
   // https://rustwasm.github.io/docs/book/game-of-life/time-profiling.html
