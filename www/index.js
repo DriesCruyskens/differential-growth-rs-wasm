@@ -2,7 +2,7 @@ import * as wasm from "differential-growth";
 import * as dat from "dat.gui";
 import * as paper from "paper";
 import { saveAs } from "file-saver";
-import * as hash from 'object-hash';
+import hash from 'object-hash';
 
 // Only executed our code once the DOM is ready.
 window.onload = function () {
