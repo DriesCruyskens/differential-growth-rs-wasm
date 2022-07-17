@@ -194,7 +194,12 @@ impl RustDifferentialGrowth {
             //     separate_forces[i].div_assign(_amount_of_close_nodes as f64);
             // }
 
+            // Set magnitude can make the separation force become a NaN value.
+            // Since this breaks everything, x or y is set to 0 when NaN is detected.
             separate_forces[i].set_magnitude(self.max_speed);
+            if separate_forces[i].x.is_nan() {separate_forces[i].x = 0.0;};
+            if separate_forces[i].y.is_nan() {separate_forces[i].y = 0.0;};
+
             separate_forces[i].sub_assign(self.nodes[i].velocity);
             separate_forces[i] = separate_forces[i].cap_magnitude(self.max_force);
         }
