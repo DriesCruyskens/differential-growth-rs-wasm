@@ -1,7 +1,7 @@
 // import * as wasm from "differential-growth";
 import init, { RustDifferentialGrowth } from "rust-differential-growth";
-import * as dat from "dat.gui";
-import * as paper from "paper";
+import dat from "dat.gui";
+import { paper } from "paper";
 import { saveAs } from "file-saver";
 import hash from "object-hash";
 
