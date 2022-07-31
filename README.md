@@ -29,10 +29,14 @@ failed optimisations:
 
 ### Developing
 
-Compile rust (execute manually after file changes):
-`wasm-pack build`
+#### Compile rust (execute manually after file changes):
+`wasm-pack build --target web`
 
-Start Vite dev server (auto re-compiles on file changes):
+> We need to specify `--target web` because we are using Vite which is a no-bundler.
+> <https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html>
+> <https://rustwasm.github.io/docs/wasm-bindgen/reference/deployment.html>
+
+#### Start Vite dev server (auto re-compiles on file changes):
 `cd www && npm start`
 
 ### References
