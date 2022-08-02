@@ -2,6 +2,10 @@
 
 A WebAssembly wrapper around a Rust implementation of the differential growth algorithm.
 
+![example gif](https://raw.githubusercontent.com/DriesCruyskens/differential-growth-rs-wasm/main/images/example.gif)
+
+As you can see its blazingly fast.
+
 ### Example
 
 A full example is provided in the source code's `/www` directory. 
