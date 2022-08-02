@@ -1,3 +1,5 @@
+note: this wasm-pack template has been modified to use Vite instead of Webpack
+
 <div align="center">
 
   <h1><code>create-wasm-app</code></h1>

@@ -1,5 +1,7 @@
-// import * as wasm from "differential-growth";
-import init, { RustDifferentialGrowth } from "rust-differential-growth";
+import init, {
+  DifferentialGrowthWasm,
+  generate_points_on_circle,
+} from "rust-differential-growth";
 import dat from "dat.gui";
 import { paper } from "paper";
 import { saveAs } from "file-saver";
@@ -46,6 +48,7 @@ class DifferentialGrowth {
       name: "Differential Growth",
       autoPlace: true,
       closeOnTop: false,
+      closed: true,
     });
 
     this.initGui();
@@ -66,18 +69,20 @@ class DifferentialGrowth {
 
     this.ctx.lineWidth = this.params.strokeWidth;
 
-    this.rustDifferentialGrowth = new RustDifferentialGrowth(
-      paper.view.center.x,
-      paper.view.center.y,
-      this.params.nStartingPoints,
-      this.params.radius,
+    console.log(paper.view.bounds.width, paper.view.bounds.height);
+
+    this.rustDifferentialGrowth = new DifferentialGrowthWasm(
+      generate_points_on_circle(
+        paper.view.center.x,
+        paper.view.center.y,
+        10.0,
+        10
+      ),
       this.params.maxForce,
       this.params.maxSpeed,
       this.params.desiredSeparation,
       this.params.separationCohesionRatio,
-      this.params.maxEdgeLength,
-      this.canvas.width,
-      this.canvas.height
+      this.params.maxEdgeLength
     );
 
     this.currentStep = 0;
@@ -85,15 +90,28 @@ class DifferentialGrowth {
   }
 
   animationLoop() {
+    // Stop animation if amount of frames is fulfilled.
     if (this.currentStep > this.params.maxSteps) {
       return;
     }
 
-    // The tick() function returns the amount of points. Used for statistics.
-    this.amountOfTotalPoints = this.rustDifferentialGrowth.tick();
-    this.rustDifferentialGrowth.render(this.ctx);
+    this.rustDifferentialGrowth.tick();
+
+    // Let wasm render.
+    this.rustDifferentialGrowth.render(
+      this.ctx,
+      paper.view.bounds.width,
+      paper.view.bounds.height
+    );
+
+    // or render yourself.
+    // don't forget to convert array of numbers to array of vectors.
+    // let points = this.rustDifferentialGrowth.export_as_slice();
 
     if (this.params.statistics) {
+      this.amountOfTotalPoints =
+        this.rustDifferentialGrowth.get_amount_of_points();
+
       this.renderStatistics();
     }
 

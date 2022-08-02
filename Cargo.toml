@@ -1,8 +1,10 @@
 [package]
-name = "rust-differential-growth"
+name = "differential-growth-rs-wasm"
 version = "0.1.0"
 authors = ["Dries Cruyskens <dries.cruyskens@gmail.com>"]
-edition = "2018"
+homepage = "https://github.com/DriesCruyskens/differential-growth-rs-wasm"
+repository = "https://github.com/DriesCruyskens/differential-growth-rs-wasm"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -17,9 +19,8 @@ web-sys = { version = "0.3.57", features = [
   "console",
   "CanvasRenderingContext2d",
 ] }
+differential-growth = "0.3.0"
 nalgebra = "0.31.0"
-kd-tree = { version = "0.4.1" }
-typenum = "1.15.0"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -36,11 +37,6 @@ wee_alloc = { version = "0.4.5", optional = true }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
-criterion = "0.3"
-
-[[bench]]
-name = "my_benchmark"
-harness = false
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.

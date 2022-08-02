@@ -1,43 +1,94 @@
 ## Differential Line Growth with Rust WASM
 
-This project uses wasm-pack and took the official wasm-pack game of life tutorial as a starting point.
+A WebAssembly wrapper around a Rust implementation of the differential growth algorithm.
 
-### Notes
+### Example
 
-js: 
-- Datgui
-- Export SVG/ parameters
-- Statistics
-- 2 different renderers: paperjs (smoother animation) and canvas-api (faster)
-  
-Rust: 
-- nalgebra for its point and vector
-- Benchmarks using criterionrs
+A full example is provided in the source code's `/www` directory. 
+Run it using:
 
-optimisations:
+```js
+cd www && npm init && npm start
+```
 
-- kd-tree for getting neighbor nodes when calculating rejection forces
-- removed branching out of hot loops
-- canvas calls in wasm (48s -> 43s)
+You can play around with the input variables using [dat.gui](https://github.com/dataarts/dat.gui) and export the result to SVG.
 
-failed optimisations:
+### Usage
 
-- Letting Javascript access wasm's linear memory for the point's coordinates actually decreases perfomance. That is why I pass a boxed slice.
-- Moving requestAnimationFrame to wasm does not improve performance.
+The package is build using `wasm-pack build --target web` so it can be used with native javascript modules instead of needing a bundler. More info in the `wasm-bindgen` docs
+ [here](https://rustwasm.github.io/wasm-bindgen/reference/deployment.html) and
+ [here](https://rustwasm.github.io/wasm-bindgen/examples/without-a-bundler.html), 
+ and in the `wasm-pack` docs [here](https://rustwasm.github.io/docs/wasm-pack/commands/build.html?highlight=--target#target).
+ This is done in order to enable development using [Vite](https://v2.vitejs.dev/).
 
+At the time of development WASM and Javascript can only communicate using basic types. The array of point coordinates is represented as a flattened array of numbers when it is returned or passed as a function argument. Manual conversion to and from an array of points is necessary.
+
+
+```js
+// Since we use `--target web`, manual initialisation of the WebAssembly module is required.
+import init, {
+  DifferentialGrowthWasm,
+  generate_points_on_circle,
+} from "rust-differential-growth";
+
+// Initialise WASM
+await init();
+
+// Using the included helper function to generate point on a circle.
+let starting_points = generate_points_on_circle(
+        paper.view.center.x,
+        paper.view.center.y,
+        10.0,
+        10
+      );
+
+// Instatiate differential growth object
+let rustDifferentialGrowth = new DifferentialGrowthWasm(
+    starting_points,
+    1,5, // maxForce
+    1.0, // maxSpeed
+    14, // desiredSeparation
+    1.1, // separationCohesionRatio
+    5.0 // maxEdgeLength
+);
+
+// Advance the algorithm by a single iteration.
+rustDifferentialGrowth.tick();
+
+// Either let WASM render the result to a canvas.
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext('2d');
+rustDifferentialGrowth.render(
+    ctx,
+    canvas.width,
+    canvas.height,
+);
+
+// or get the array of coordinates and render yourself.
+// don't forget to convert array of numbers to array of vectors.
+let points = rustDifferentialGrowth.export_as_slice();      
+```
+
+The choice of algorithm parameters is a very important factor to achieving a desirable result.
 
 
 ### Developing
 
 #### Compile rust (execute manually after file changes):
-`wasm-pack build --target web`
+In the project root:
+```bash
+wasm-pack build --target web
+```
 
-> We need to specify `--target web` because we are using Vite which is a no-bundler.
-> <https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html>
-> <https://rustwasm.github.io/docs/wasm-bindgen/reference/deployment.html>
+#### Run development server
+In the `/www` folder:
+```bash
+npm init
+```
 
-#### Start Vite dev server (auto re-compiles on file changes):
-`cd www && npm start`
+```bash
+npm start
+```
 
 ### References
  
@@ -52,10 +103,11 @@ failed optimisations:
 - <https://stackoverflow.com/questions/50721411/how-to-see-rust-source-code-when-debugging-webassembly-in-a-browser>
 - <https://web.dev/canvas-hidipi/>
 - <https://rustwasm.github.io/wasm-bindgen/examples/without-a-bundler.html>
+- <https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/packaging-and-publishing.html>
 
-### TODOS
-- starting shapes dropdown
-- draw line using mouse?
-- different growing algorithms + datgui dropdown
-  
-- publish to npm
+### Notes
+failed optimisations:
+
+- Letting Javascript access wasm's linear memory for the point's coordinates actually decreases perfomance. That is why I pass a boxed slice.
+- Moving requestAnimationFrame to wasm does not improve performance.
+
