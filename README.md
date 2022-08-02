@@ -33,17 +33,17 @@ At the time of development WASM and Javascript can only communicate using basic 
 import init, {
   DifferentialGrowthWasm,
   generate_points_on_circle,
-} from "rust-differential-growth";
+} from "differential-growth-rs-wasm";
 
 // Initialise WASM
 await init();
 
 // Using the included helper function to generate point on a circle.
 let starting_points = generate_points_on_circle(
-        paper.view.center.x,
-        paper.view.center.y,
-        10.0,
-        10
+        200, // origin_x
+        200, // origin_y
+        10.0, // radius
+        10 // amount of points
       );
 
 // Instatiate differential growth object
