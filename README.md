@@ -8,7 +8,7 @@ As you can see its blazingly fast.
 
 ### Example
 
-A full example is provided in the source code's `/www` directory. 
+A full example available online [here](https://differential-growth-example.vercel.app/)(and its [repo](https://github.com/DriesCruyskens/differential-growth-example)) and is provided in the source code's `/www` directory. 
 Run it using:
 
 ```js
