@@ -1,10 +1,12 @@
 [package]
 name = "differential-growth-rs-wasm"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Dries Cruyskens <dries.cruyskens@gmail.com>"]
 homepage = "https://github.com/DriesCruyskens/differential-growth-rs-wasm"
 repository = "https://github.com/DriesCruyskens/differential-growth-rs-wasm"
 keywords = ["generative", "art", "wasm", "rust"]
+license = "MIT OR Apache-2.0"
+
 edition = "2021"
 
 [lib]
